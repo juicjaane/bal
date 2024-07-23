@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--=============== REMIXICONS ===============-->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <!--=============== CSS ===============-->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/templatemo-style.css" />
+    <link rel="stylesheet" href="css/custom-style.css" />
+    <title>Blue.AI - NGO Sign Up</title>
+    <style>
+        /* Include the updated CSS here */
+        body {
+            background-color: #003e3f;
+            color: #fff;
+            margin-top: 0rem;
+            font-size: 1rem;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh; /* Full viewport height */
+            width: 300vw; /* Full viewport width */
+            margin-top: 4rem; /* Remove margin to align with the edge of the viewport */
+        }
+        .text-section {
+            flex: 1;
+            background-color: #003e3f; /* Same as body background to blend seamlessly */
+            color: #fff;
+            display: flex;
+            justify-content: center; /* Center content horizontally */
+            align-items: center; /* Center content vertically */
+            height: 100vh; /* Full viewport height */
+        }
+
+
+        .text-section h1 {
+            font-size: 2em;
+            margin-top: 5px;
+        }
+
+        .text-section p {
+            font-size: 1.2em;
+        }
+
+        .form-section {
+            flex: 1;
+            background-color: #fff;
+            color: #000;
+            padding: 50px;
+            border-radius: 0 8px 8px 0; /* Rounded corners only on the right side */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .signup__box {
+            display: flex; /* Use flexbox to align items horizontally */
+            align-items: center; /* Center items vertically */
+            margin-bottom: 40px; /* Add space between text boxes */
+        }
+
+        .signup__icon {
+            margin-right: 10px; /* Space between the icon and input */
+            font-size: 1.5rem; /* Adjust size as needed */
+        }
+
+        .signup__box-input {
+            flex: 1; /* Allow input to take remaining space */
+            position: relative; 
+            display: center;
+            /* Ensure label is positioned correctly */
+        }
+
+        .signup__input {
+            width: 100%;
+            padding: 5px 5px 10px 0; /* Add padding for spacing and remove left padding */
+            border: none; /* Remove the border */
+            border-bottom: 2px solid #003e3f; /* Add an underline with blue color */
+            outline: none; /* Remove default focus outline */
+            font-size: 1rem; /* Ensure font size is consistent */
+        }
+
+        .signup__input:focus {
+            border-bottom: 2px solid #0056b3; /* Change underline color on focus */
+        }
+
+        .signup__label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 0.9rem;
+            color: #666;
+            transition: all 0.2s ease;
+        }
+
+        .signup__input:focus + .signup__label,
+        .signup__input:not(:placeholder-shown) + .signup__label {
+            top: -1.5rem; /* Adjust label position when focused */
+            font-size: 0.8rem;
+            color: #003e3f;
+        }
+
+        .signup__button {
+            background-color: #003e3f;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            display: center;
+        }
+
+        .signup__button:hover {
+            background-color: #002d2e;
+        }
+
+        .signup__login {
+            margin-top: 10px;
+        }
+
+        .signup__login-link {
+            color: #003e3f;
+        }
+
+
+        
+
+    </style>
+</head>
+<body>
+    <div class="top-panel">
+        <div class="title">Blue AI</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="page-aboutus.html">About Us</a></li>
+            <li><a href="page-donate.html">Donate</a></li>
+            <li><a href="page-corporates.html">For Corporates</a></li>
+            <li><a href="page-ngos.html">For NGOs</a></li>
+            <li><a href="page-login.html">Login / Sign Up</a></li>
+        </ul>
+    </div>
+    <div class="container">
+        <div class="text-section">
+            <div>
+                <h1>Welcome to Blue.AI</h1>
+                <p>Sign up to join our community of NGOs working towards a better future. Please fill in the form to register your organization.</p>
+            </div>
+        </div>
+        <div class="form-section">
+            <form action="" method="post" class="signup__form" enctype="multipart/form-data">
+
+                <div class="signup__box">
+                    <i class="ri-user-3-line signup__icon"></i>
+                    <div class="signup__box-input">
+                        <input type="text" required class="signup__input" id="signup-username" placeholder=" ">
+                        <label for="signup-username" class="signup__label">Username</label>
+                    </div>
+                </div>
+
+                <div class="signup__box">
+                    <i class="ri-lock-2-line signup__icon"></i>
+                    <div class="signup__box-input">
+                        <input type="password" required class="signup__input" id="signup-password" placeholder=" ">
+                        <label for="signup-password" class="signup__label">Password</label>
+                    </div>
+                </div>
+
+                <div class="signup__box">
+                    <i class="ri-building-2-line signup__icon"></i>
+                    <div class="signup__box-input">
+                        <input type="text" required class="signup__input" id="signup-org" placeholder=" ">
+                        <label for="signup-org" class="signup__label">Organization Name</label>
+                    </div>
+                </div>
+
+                <div class="signup__box">
+                    <i class="ri-file-text-line signup__icon"></i>
+                    <div class="signup__box-input">
+                        <input type="file" required class="signup__input" id="signup-cert" placeholder=" ">
+                        <label for="signup-cert" class="signup__label">Certificate</label>
+                    </div>
+                </div>
+
+                <!-- Add more relevant details if needed -->
+                <div class="signup__box">
+                    <i class="ri-map-pin-line signup__icon"></i>
+                    <div class="signup__box-input">
+                        <input type="text" required class="signup__input" id="signup-address" placeholder=" ">
+                        <label for="signup-address" class="signup__label">Address</label>
+                    </div>
+                </div>
+
+                <div class="signup__box">
+                    <i class="ri-phone-line signup__icon"></i>
+                    <div class="signup__box-input">
+                        <input type="text" required class="signup__input" id="signup-phone" placeholder=" ">
+                        <label for="signup-phone" class="signup__label">Phone Number</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="signup__button">Sign Up</button>
+
+                <p class="signup__login">
+                    Already have an account? 
+                    <a href="page-login.html" class="signup__login-link">Login</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!--=============== MAIN JS ===============-->
+    <script src="main.js"></script>
+</body>
+</html>

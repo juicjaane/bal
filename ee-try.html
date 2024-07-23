@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/earthengine/0.1.365/earthengine-api.min.js"></script>
+    <style>
+      /* Set the size of the div element that contains the map. */
+      #map-container {
+        height: 400px;
+        width: 100%;
+        background-color: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- The "Sign in with Google" button, initially hidden. -->
+    <input
+      id="g-sign-in"
+      type="image"
+      src="https://developers.google.com/identity/images/btn_google_signin_light_normal_web.png"
+      onclick="onSignInButtonClick()"
+      alt="Sign in with Google"
+      hidden
+    />
+
+    <!-- Element where map will be added. -->
+    <div id="map-container"></div>
+    <script>
+      // The OAuth Client ID from the Google Developers Console.
+      const CLIENT_ID = "YOUR_CLIENT_ID";
+
+      // Initializes Maps JavaScript API and Earth Engine API, instructing the map
+      // to pull tiles from Earth Engine and to overlay them on the map.
+      function setUpMap() {
+        // Hide the sign-in button.
+        document.getElementById("g-sign-in").setAttribute("hidden", "true");
+
+        // Initialize the Earth Engine API. Must be called once before using the API.
+        ee.initialize();
+
+        // Get a reference to the placeholder DOM element to contain the map.
+        const mapContainerEl = document.getElementById("map-container");
+
+        // Create an interactive map inside the placeholder DOM element.
+        const embeddedMap = new google.maps.Map(mapContainerEl, {
+          // Pan and zoom initial map viewport to Grand Canyon.
+          center: {lng: -112.8598, lat: 36.2841},
+          zoom: 9,
+        });
+
+        // Obtain reference to digital elevation model and apply algorithm to
+        // calculate slope.
+        const srtm = ee.Image("CGIAR/SRTM90_V4");
+        const slope = ee.Terrain.slope(srtm);
+
+        // Create a new tile source to fetch visible tiles on demand and display them
+        // on the map.
+        const mapId = slope.getMap({min: 0, max: 60});
+        const tileSource = new ee.layers.EarthEngineTileSource(mapId);
+        const overlay = new ee.layers.ImageOverlay(tileSource);
+        embeddedMap.overlayMapTypes.push(overlay);
+      }
+
+      // Handles clicks on the sign-in button.
+      function onSignInButtonClick() {
+        // Display popup allowing the user to sign in with their Google account and to
+        // grant appropriate permissions to the app.
+        ee.data.authenticateViaPopup(setUpMap);
+      }
+
+      // If the user is signed in, display a popup requesting permissions needed to
+      // run the app, otherwise show the sign-in button.
+      ee.data.authenticateViaOauth(
+        // The OAuth Client ID defined above.
+        CLIENT_ID,
+        // Callback invoked immediately when user is already signed in.
+        setUpMap,
+        // Show authentication errors in a popup.
+        alert,
+        // Request permission to only read and compute Earth Engine data on behalf of
+        // user.
+        /* extraScopes = */ ['https://www.googleapis.com/auth/earthengine.readonly'],
+        // Show sign-in button if reusing existing credentials fails.
+        () => document.getElementById("g-sign-in").removeAttribute("hidden"),
+        // Don't require ability to write and access Cloud Platform on behalf of the
+        // user.
+        /* opt_suppressDefaultScopes = */ true
+      );
+    </script>
+  </body>
+</html>
