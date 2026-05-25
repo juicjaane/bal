@@ -124,3 +124,20 @@ def profile():
                 flash(f'Update failed: {e}', 'danger')
     
     return render_template('ngo/profile.html', user=user_data)
+
+@ngo_bp.route('/patch-health')
+@ngo_required
+def patch_health():
+    db = get_db()
+    area = 'Sundarbans, India'
+    if db:
+        try:
+            doc = db.collection('users').document(session['user_id']).get()
+            if doc.exists:
+                area = doc.to_dict().get('area', area)
+        except Exception as e:
+            logger.error(f"Area fetch: {e}")
+    
+    from ..services.health_tracker import assess_patch_health
+    health = assess_patch_health(area)
+    return render_template('ngo/patch-health.html', health=health, area=area)

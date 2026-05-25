@@ -45,7 +45,8 @@ def home():
         ngos_supported=ngos_supported,
         trees_funded=trees_funded,
         carbon_offset=carbon_offset,
-        recent_donations=recent_donations
+        recent_donations=recent_donations,
+        discover_url=url_for('corporate.discover')
     )
 
 @corporate_bp.route('/donate')
@@ -131,8 +132,7 @@ def impact():
         ngo_breakdown=ngo_breakdown,
         trees_funded=trees_funded,
         carbon_offset=carbon_offset,
-        area_restored=area_restored,
-        has_donations=bool(donations_list)
+        area_restored=area_restored
     )
 
 @corporate_bp.route('/profile', methods=['GET', 'POST'])
@@ -163,36 +163,15 @@ def profile():
     
     return render_template('corporate/profile.html', user=user_data)
 
-@corporate_bp.route('/csr-report')
+@corporate_bp.route('/discover')
 @corporate_required
-def csr_report():
+def discover():
     db = get_db()
-    if not db:
-        flash('Database unavailable.', 'danger')
-        return redirect(url_for('corporate.impact'))
-    
-    try:
-        # Get company profile
-        company_doc = db.collection('users').document(session['user_id']).get()
-        company_data = company_doc.to_dict() if company_doc.exists else {}
-        
-        # Get all donations
-        donations_docs = list(db.collection('donations').where('donor_id', '==', session['user_id']).stream())
-        donations = [{'id': d.id, **d.to_dict()} for d in donations_docs]
-        
-        # Get NGO profiles for all donated NGOs
-        ngo_ids = list(set(d.get('ngo_id') for d in donations if d.get('ngo_id')))
-        ngo_data_map = {}
-        for ngo_id in ngo_ids:
-            doc = db.collection('users').document(ngo_id).get()
-            if doc.exists:
-                ngo_data_map[ngo_id] = doc.to_dict()
-        
-        from ..services.report_generator import build_csr_report_context
-        context = build_csr_report_context(company_data, donations, ngo_data_map)
-        
-        return render_template('corporate/csr-report.html', **context)
-    except Exception as e:
-        logger.error(f"CSR report error: {e}")
-        flash(f'Report generation failed: {e}', 'danger')
-        return redirect(url_for('corporate.impact'))
+    ngos = []
+    if db:
+        try:
+            docs = db.collection('users').where('type', '==', 'ngo').stream()
+            ngos = [{'id': doc.id, **doc.to_dict()} for doc in docs]
+        except Exception as e:
+            logger.error(f"NGO discovery fetch: {e}")
+    return render_template('corporate/discover.html', ngos=ngos)
