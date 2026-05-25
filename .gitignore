@@ -1,1 +1,30 @@
-node_modules/
+# Environment & secrets - NEVER commit these
+.env
+*.json
+!package.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+env/
+.venv/
+
+# Development
+*.log
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+
+# Replit
+.replit
+replit_zip_error_log.txt
+
+# Large generated files
+*.zip
