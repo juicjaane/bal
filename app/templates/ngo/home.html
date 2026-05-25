@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block title %}NGO Dashboard — Blue.AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+  <!-- Page Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h1 class="h3 fw-bold mb-0" style="color:#003e3f;">Welcome back, {{ user_name }}!</h1>
+        <span class="badge rounded-pill px-3 py-1" style="background:#003e3f;color:#fff;font-size:0.75rem;letter-spacing:0.04em;">NGO</span>
+      </div>
+      <p class="text-muted mb-0">Here's your impact overview</p>
+    </div>
+    <a href="{{ url_for('ngo.profile') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-person-circle me-1"></i>My Profile
+    </a>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="row g-3 mb-4">
+    <!-- Total Received -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:52px;height:52px;background:rgba(0,180,182,0.12);font-size:1.5rem;">💰</div>
+          <div>
+            <div class="fw-bold fs-4 lh-1" style="color:#003e3f;">₹{{ "{:,.0f}".format(total_donated) }}</div>
+            <div class="text-muted small mt-1">Total Received</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Donations -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:52px;height:52px;background:rgba(0,180,182,0.12);font-size:1.5rem;">🤝</div>
+          <div>
+            <div class="fw-bold fs-4 lh-1" style="color:#003e3f;">{{ donations_count }}</div>
+            <div class="text-muted small mt-1">Donations</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Trees Funded -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:52px;height:52px;background:rgba(0,180,182,0.12);font-size:1.5rem;">🌱</div>
+          <div>
+            <div class="fw-bold fs-4 lh-1" style="color:#003e3f;">{{ (total_donated / 10) | int }}</div>
+            <div class="text-muted small mt-1">Trees Funded</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- CO₂ Offset -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:52px;height:52px;background:rgba(0,180,182,0.12);font-size:1.5rem;">🌍</div>
+          <div>
+            <div class="fw-bold fs-4 lh-1" style="color:#003e3f;">{{ "%.1f"|format(total_donated * 0.00067) }}</div>
+            <div class="text-muted small mt-1">CO₂ Offset (tonnes)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <h5 class="fw-semibold mb-3" style="color:#003e3f;">Quick Actions</h5>
+    </div>
+    <div class="col-12 col-md-6">
+      <a href="{{ url_for('ngo.insights') }}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 quick-action-card" style="transition:transform 0.18s,box-shadow 0.18s;cursor:pointer;">
+          <div class="card-body d-flex align-items-center gap-4 py-4">
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:60px;height:60px;background:linear-gradient(135deg,#003e3f,#00b4b6);">
+              <i class="bi bi-bar-chart-fill text-white fs-4"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-5 mb-1" style="color:#003e3f;">Generate Insights</div>
+              <div class="text-muted small">Get satellite-powered reports on your area</div>
+            </div>
+            <i class="bi bi-arrow-right ms-auto" style="color:#00b4b6;font-size:1.25rem;"></i>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-12 col-md-6">
+      <a href="{{ url_for('ngo.donations') }}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 quick-action-card" style="transition:transform 0.18s,box-shadow 0.18s;cursor:pointer;">
+          <div class="card-body d-flex align-items-center gap-4 py-4">
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:60px;height:60px;background:linear-gradient(135deg,#00b4b6,#f97316);">
+              <i class="bi bi-gift-fill text-white fs-4"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-5 mb-1" style="color:#003e3f;">View Donations</div>
+              <div class="text-muted small">See all contributions from corporates</div>
+            </div>
+            <i class="bi bi-arrow-right ms-auto" style="color:#00b4b6;font-size:1.25rem;"></i>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Recent Donations Table -->
+    <div class="col-12 col-lg-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3">
+          <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-clock-history me-2" style="color:#00b4b6;"></i>Recent Donations</h6>
+          <a href="{{ url_for('ngo.donations') }}" class="btn btn-sm" style="background:#003e3f;color:#fff;">View All</a>
+        </div>
+        <div class="card-body p-0">
+          {% if recent_donations %}
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead style="background:#f8fafa;">
+                <tr>
+                  <th class="ps-4 py-3 text-muted small fw-semibold border-0">DONOR</th>
+                  <th class="py-3 text-muted small fw-semibold border-0">AMOUNT</th>
+                  <th class="py-3 text-muted small fw-semibold border-0">DATE</th>
+                  <th class="py-3 pe-4 text-muted small fw-semibold border-0">STATUS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for donation in recent_donations[:5] %}
+                <tr>
+                  <td class="ps-4 py-3 align-middle">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0" style="width:34px;height:34px;background:#003e3f;font-size:0.8rem;">
+                        {{ donation.donor_name[0].upper() if donation.donor_name else '?' }}
+                      </div>
+                      <span class="fw-medium">{{ donation.donor_name }}</span>
+                    </div>
+                  </td>
+                  <td class="py-3 align-middle fw-bold" style="color:#00b4b6;">₹{{ "{:,.0f}".format(donation.amount) }}</td>
+                  <td class="py-3 align-middle text-muted small">{{ donation.created_at.strftime('%d %b %Y') if donation.created_at else '—' }}</td>
+                  <td class="py-3 pe-4 align-middle">
+                    <span class="badge rounded-pill px-3" style="background:#d1fae5;color:#065f46;">Completed</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5 px-4">
+            <div style="font-size:3rem;">🌿</div>
+            <p class="text-muted mt-2 mb-0">No donations yet — your profile is visible to corporations!</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="col-12 col-lg-4">
+      <div class="d-flex flex-column gap-3 h-100">
+
+        <!-- Profile Completion Prompt -->
+        {% if not user_area %}
+        <div class="alert border-0 shadow-sm d-flex gap-2 align-items-start" style="background:#e0f7f7;color:#003e3f;">
+          <i class="bi bi-info-circle-fill mt-1 flex-shrink-0" style="color:#00b4b6;"></i>
+          <div>
+            <strong>Complete your profile</strong><br>
+            <span class="small">Add your area of operation to enable satellite insights.</span>
+            <div class="mt-2">
+              <a href="{{ url_for('ngo.profile') }}" class="btn btn-sm" style="background:#003e3f;color:#fff;">Update Profile</a>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Did You Know Card -->
+        <div class="card border-0 shadow-sm" style="background:linear-gradient(135deg,#003e3f,#005c5e);color:#fff;">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span style="font-size:1.4rem;">🌊</span>
+              <span class="fw-semibold" style="color:#00b4b6;">Did you know?</span>
+            </div>
+            <p class="small mb-3" style="color:rgba(255,255,255,0.85);line-height:1.6;">
+              Mangroves sequester carbon <strong style="color:#00b4b6;">5x faster</strong> than tropical forests. They also protect coastlines from storm surges and support rich marine biodiversity.
+            </p>
+            <hr style="border-color:rgba(255,255,255,0.2);">
+            <p class="small mb-0" style="color:rgba(255,255,255,0.65);">
+              <i class="bi bi-satellite me-1"></i>Satellite insights powered by Google Earth Engine
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="fw-semibold mb-3" style="color:#003e3f;">Impact Snapshot</h6>
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+              <span class="text-muted small">Avg. donation value</span>
+              <span class="fw-semibold" style="color:#003e3f;">
+                {% if donations_count > 0 %}₹{{ "{:,.0f}".format(total_donated / donations_count) }}{% else %}—{% endif %}
+              </span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+              <span class="text-muted small">Trees per donation</span>
+              <span class="fw-semibold" style="color:#003e3f;">
+                {% if donations_count > 0 %}{{ ((total_donated / 10) / donations_count) | int }}{% else %}—{% endif %}
+              </span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-2">
+              <span class="text-muted small">CO₂ offset / tree</span>
+              <span class="fw-semibold" style="color:#003e3f;">~6.7 kg/yr</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.quick-action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,62,63,0.12) !important;
+}
+</style>
+{% endblock %}

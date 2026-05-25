@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Donations Received — Blue.AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+  <!-- Page Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h1 class="h3 fw-bold mb-1" style="color:#003e3f;">Donations Received</h1>
+      <p class="text-muted mb-0">All contributions made to your organisation</p>
+    </div>
+    <a href="{{ url_for('ngo.insights') }}" class="btn" style="background:#003e3f;color:#fff;">
+      <i class="bi bi-bar-chart-fill me-1"></i>Generate Impact Report
+    </a>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-sm-4">
+      <div class="card border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body">
+          <div class="text-muted small fw-semibold mb-1">TOTAL RECEIVED</div>
+          <div class="fw-bold fs-3" style="color:#003e3f;">₹{{ "{:,.0f}".format(total) }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-4">
+      <div class="card border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body">
+          <div class="text-muted small fw-semibold mb-1">NUMBER OF DONATIONS</div>
+          <div class="fw-bold fs-3" style="color:#003e3f;">{{ donations | length }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-4">
+      <div class="card border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body">
+          <div class="text-muted small fw-semibold mb-1">AVERAGE DONATION</div>
+          <div class="fw-bold fs-3" style="color:#003e3f;">
+            {% if donations %}₹{{ "{:,.0f}".format(total / donations|length) }}{% else %}—{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Donations Table -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3">
+      <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-table me-2" style="color:#00b4b6;"></i>All Donations</h6>
+    </div>
+    <div class="card-body p-0">
+      {% if donations %}
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead style="background:#f8fafa;">
+            <tr>
+              <th class="ps-4 py-3 text-muted small fw-semibold border-0">#</th>
+              <th class="py-3 text-muted small fw-semibold border-0">DATE</th>
+              <th class="py-3 text-muted small fw-semibold border-0">DONOR</th>
+              <th class="py-3 text-muted small fw-semibold border-0">AMOUNT</th>
+              <th class="py-3 pe-4 text-muted small fw-semibold border-0">STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for donation in donations %}
+            <tr>
+              <td class="ps-4 py-3 align-middle text-muted small">{{ loop.index }}</td>
+              <td class="py-3 align-middle text-muted small">
+                {{ donation.created_at.strftime('%d %b %Y') if donation.created_at else '—' }}
+              </td>
+              <td class="py-3 align-middle">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0" style="width:32px;height:32px;background:#003e3f;font-size:0.75rem;">
+                    {{ donation.donor_name[0].upper() if donation.donor_name else '?' }}
+                  </div>
+                  <span class="fw-medium">{{ donation.donor_name }}</span>
+                </div>
+              </td>
+              <td class="py-3 align-middle fw-bold" style="color:#16a34a;">₹{{ "{:,.0f}".format(donation.amount) }}</td>
+              <td class="py-3 pe-4 align-middle">
+                <span class="badge rounded-pill px-3" style="background:#d1fae5;color:#065f46;">Completed</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <div style="font-size:4rem;">🌿</div>
+        <h6 class="fw-semibold mt-3" style="color:#003e3f;">No donations yet</h6>
+        <p class="text-muted small">Share your NGO profile with corporations to receive funding.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Export Hint -->
+  <div class="alert border-0 shadow-sm d-flex gap-2 align-items-start" style="background:#e0f7f7;color:#003e3f;">
+    <i class="bi bi-lightbulb-fill mt-1 flex-shrink-0" style="color:#00b4b6;"></i>
+    <div>
+      <strong>Want to show donors the impact?</strong><br>
+      <span class="small">Generate an impact report in Insights to visualise how funds are being used for mangrove restoration.</span>
+      <div class="mt-2">
+        <a href="{{ url_for('ngo.insights') }}" class="btn btn-sm" style="background:#003e3f;color:#fff;">Go to Insights →</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
