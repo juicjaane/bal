@@ -1,0 +1,815 @@
+{% extends 'base.html' %}
+
+{% block title %}CSR Impact Report — {{ company.get('name', 'Corporate') }} | Blue.AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ============================================================
+     SCREEN STYLES
+     ============================================================ */
+  :root {
+    --brand-teal:   #00b4b6;
+    --brand-green:  #1a7a4a;
+    --brand-dark:   #0d2b1f;
+    --ink:          #1a1a2e;
+    --muted:        #6c757d;
+    --border-light: #dee2e6;
+    --section-bg:   #f8fffe;
+    --accent-bg:    #e8f7f4;
+  }
+
+  body {
+    background: #f4f7f6;
+    color: var(--ink);
+  }
+
+  /* ---- Print Button ---- */
+  .btn-print {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    background: var(--brand-teal);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 0.75rem 1.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 4px 18px rgba(0,180,182,0.4);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-print:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0,180,182,0.55);
+    color: #fff;
+  }
+
+  /* ---- Report Wrapper ---- */
+  .report-wrapper {
+    max-width: 900px;
+    margin: 2rem auto 5rem;
+    background: #fff;
+    box-shadow: 0 2px 32px rgba(0,0,0,0.10);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  /* ---- Cover ---- */
+  .report-cover {
+    background: linear-gradient(135deg, var(--brand-dark) 0%, #0a5c3a 60%, var(--brand-teal) 100%);
+    color: #fff;
+    padding: 3.5rem 3rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .report-cover::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: rgba(0,180,182,0.15);
+    pointer-events: none;
+  }
+  .report-cover::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    pointer-events: none;
+  }
+  .cover-logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .cover-logo span.dot { color: var(--brand-teal); }
+  .cover-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+  }
+  .cover-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.85;
+    margin-bottom: 2rem;
+  }
+  .cover-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 2rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+  .cover-meta-item label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.65;
+    display: block;
+  }
+  .cover-meta-item span {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  /* ---- Sections ---- */
+  .report-section {
+    padding: 2.5rem 3rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .report-section:last-child { border-bottom: none; }
+
+  .section-heading {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--brand-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--brand-teal);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-heading .section-num {
+    background: var(--brand-teal);
+    color: #fff;
+    font-size: 0.75rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ---- KPI Grid ---- */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 0;
+  }
+  .kpi-card {
+    background: var(--accent-bg);
+    border: 1px solid rgba(0,180,182,0.2);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+  }
+  .kpi-card .kpi-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+  .kpi-card .kpi-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--brand-dark);
+    line-height: 1.1;
+  }
+  .kpi-card .kpi-unit {
+    font-size: 0.85rem;
+    color: var(--brand-teal);
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+
+  /* ---- Compliance Box ---- */
+  .compliance-box {
+    background: #fffbea;
+    border-left: 4px solid #f5a623;
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+  }
+  .compliance-box strong { color: #7a5a00; }
+
+  /* ---- Info Table ---- */
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .info-table tr td:first-child {
+    width: 220px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 0.5rem 0;
+    vertical-align: top;
+  }
+  .info-table tr td:last-child {
+    padding: 0.5rem 0;
+    color: var(--ink);
+  }
+
+  /* ---- NGO Card ---- */
+  .ngo-card {
+    background: var(--section-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .ngo-card:last-child { margin-bottom: 0; }
+  .ngo-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .ngo-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--brand-dark);
+  }
+  .ngo-total-badge {
+    background: var(--brand-teal);
+    color: #fff;
+    border-radius: 50px;
+    padding: 0.25rem 0.9rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  /* ---- Ledger Table ---- */
+  .ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .ledger-table thead th {
+    background: var(--brand-dark);
+    color: #fff;
+    padding: 0.65rem 0.85rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .ledger-table thead th:first-child { border-radius: 6px 0 0 0; }
+  .ledger-table thead th:last-child  { border-radius: 0 6px 0 0; }
+  .ledger-table tbody tr:nth-child(even) { background: #f8fffe; }
+  .ledger-table tbody td {
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+  }
+  .ledger-table tbody tr:last-child td { border-bottom: none; }
+  .ledger-table tfoot td {
+    padding: 0.65rem 0.85rem;
+    font-weight: 700;
+    background: var(--accent-bg);
+    color: var(--brand-dark);
+    border-top: 2px solid var(--brand-teal);
+  }
+  .tx-ref {
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ---- Impact Bar ---- */
+  .impact-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0.7rem 0;
+    border-bottom: 1px dashed var(--border-light);
+  }
+  .impact-row:last-child { border-bottom: none; }
+  .impact-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .impact-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--brand-dark);
+  }
+  .impact-unit {
+    font-size: 0.8rem;
+    color: var(--brand-teal);
+    font-weight: 600;
+    margin-left: 0.3rem;
+  }
+
+  /* ---- Signatures ---- */
+  .signature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1rem;
+  }
+  .sig-box {
+    text-align: center;
+  }
+  .sig-line {
+    border-bottom: 2px solid #222;
+    height: 3rem;
+    margin-bottom: 0.5rem;
+  }
+  .sig-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ---- Footer Strip ---- */
+  .report-footer-strip {
+    background: var(--brand-dark);
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+    padding: 1rem 3rem;
+    font-size: 0.8rem;
+  }
+  .report-footer-strip strong { color: var(--brand-teal); }
+
+  .footnote {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.75rem;
+    font-style: italic;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ============================================================
+     PRINT STYLES
+     ============================================================ */
+  @media print {
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    /* Hide all screen chrome */
+    #mainNav,
+    footer,
+    #flash-container,
+    .btn-print {
+      display: none !important;
+    }
+
+    body {
+      background: #fff !important;
+      color: #000 !important;
+      font-size: 10pt;
+    }
+
+    .report-wrapper {
+      max-width: 100%;
+      margin: 0;
+      box-shadow: none;
+      border-radius: 0;
+    }
+
+    /* Cover: keep gradient as background-print-color */
+    .report-cover {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
+      padding: 2rem 2.5cm;
+    }
+
+    .report-section {
+      padding: 1.2rem 2.5cm;
+      break-inside: avoid;
+    }
+
+    /* Page breaks between major sections */
+    .report-section.break-before {
+      break-before: page;
+    }
+
+    .kpi-grid, .kpi-card, .compliance-box,
+    .ngo-card, .impact-row, .signature-grid {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
+    }
+
+    .ledger-table thead th {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
+    }
+
+    /* Ensure tables don't split mid-row */
+    .ledger-table tr {
+      break-inside: avoid;
+    }
+
+    .report-footer-strip {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
+    }
+
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Print / Save Button (hidden on print) -->
+<button class="btn-print" onclick="window.print()" aria-label="Print or save as PDF">
+  &#128424; Print / Save as PDF
+</button>
+
+<div class="report-wrapper">
+
+  <!-- ================================================================
+       COVER
+       ================================================================ -->
+  <div class="report-cover">
+    <div class="cover-logo">
+      <span>&#127807;</span>
+      Blue<span class="dot">.</span>AI
+    </div>
+    <div class="cover-title">CSR Impact Report</div>
+    <div class="cover-subtitle">
+      Corporate Social Responsibility Expenditure Statement<br>
+      <em>MCA CSR-2 Compatible Format</em>
+    </div>
+    <div class="cover-meta-grid">
+      <div class="cover-meta-item">
+        <label>Company</label>
+        <span>{{ company.get('name', 'N/A') }}</span>
+      </div>
+      <div class="cover-meta-item">
+        <label>Financial Year</label>
+        <span>FY {{ financial_year }}</span>
+      </div>
+      <div class="cover-meta-item">
+        <label>Report ID</label>
+        <span>{{ report_id }}</span>
+      </div>
+      <div class="cover-meta-item">
+        <label>Report Date</label>
+        <span>{{ report_date }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       SECTION 1: EXECUTIVE SUMMARY
+       ================================================================ -->
+  <div class="report-section">
+    <div class="section-heading">
+      <span class="section-num">1</span>
+      Executive Summary
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total CSR Investment</div>
+        <div class="kpi-value">₹{{ "{:,.0f}".format(total_donated) }}</div>
+        <div class="kpi-unit">Indian Rupees</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Trees Funded</div>
+        <div class="kpi-value">{{ "{:,}".format(impact.trees_funded) }}</div>
+        <div class="kpi-unit">Mangrove saplings</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">CO&#8322; Offset Range (est.)</div>
+        <div class="kpi-value">{{ impact.carbon_low }}&ndash;{{ impact.carbon_high }}</div>
+        <div class="kpi-unit">tonnes CO&#8322;e / year *</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Hectares Restored</div>
+        <div class="kpi-value">{{ impact.area_hectares }}</div>
+        <div class="kpi-unit">hectares of mangrove</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       SECTION 2: REGULATORY COMPLIANCE
+       ================================================================ -->
+  <div class="report-section">
+    <div class="section-heading">
+      <span class="section-num">2</span>
+      Regulatory Compliance
+    </div>
+
+    <div class="compliance-box">
+      <strong>Statutory Basis:</strong> This report documents CSR expenditure under
+      <strong>{{ csr_section }}</strong>, which mandates qualifying companies to spend
+      at least 2% of average net profits on CSR activities.
+    </div>
+    <div class="compliance-box">
+      <strong>Activity Classification:</strong> {{ activity_schedule }}
+    </div>
+
+    <h6 class="fw-semibold mt-3 mb-2" style="color:var(--brand-dark);">Company Details</h6>
+    <table class="info-table">
+      <tr>
+        <td>Company Name</td>
+        <td><strong>{{ company.get('name', 'N/A') }}</strong></td>
+      </tr>
+      <tr>
+        <td>Registered Address</td>
+        <td>{{ company.get('address', '&mdash;') }}</td>
+      </tr>
+      <tr>
+        <td>Website</td>
+        <td>
+          {% if company.get('website') %}
+            <a href="{{ company.website }}">{{ company.website }}</a>
+          {% else %}&mdash;{% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td>CIN / Registration No.</td>
+        <td>{{ company.get('cin', company.get('registration_no', '&mdash;')) }}</td>
+      </tr>
+      <tr>
+        <td>Contact Email</td>
+        <td>{{ company.get('email', '&mdash;') }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ================================================================
+       SECTION 3: NGO PARTNER DETAILS
+       ================================================================ -->
+  <div class="report-section break-before">
+    <div class="section-heading">
+      <span class="section-num">3</span>
+      Implementing NGO Partner Details
+    </div>
+
+    {% if ngo_breakdown %}
+      {% for ngo in ngo_breakdown %}
+      <div class="ngo-card">
+        <div class="ngo-card-header">
+          <div>
+            <div class="ngo-name">{{ ngo.name }}</div>
+            {% if ngo.profile.get('area') or ngo.profile.get('location') %}
+            <div class="small text-muted mt-1">
+              <i class="bi bi-geo-alt-fill" style="color:var(--brand-teal);"></i>
+              {{ ngo.profile.get('area', ngo.profile.get('location', '')) }}
+            </div>
+            {% endif %}
+          </div>
+          <div class="ngo-total-badge">₹{{ "{:,.0f}".format(ngo.total) }}</div>
+        </div>
+
+        <table class="info-table mb-3">
+          {% if ngo.profile.get('address') %}
+          <tr>
+            <td>Address</td>
+            <td>{{ ngo.profile.address }}</td>
+          </tr>
+          {% endif %}
+          {% if ngo.profile.get('registration_no') or ngo.profile.get('ngo_reg_no') %}
+          <tr>
+            <td>NGO Registration No.</td>
+            <td>{{ ngo.profile.get('registration_no', ngo.profile.get('ngo_reg_no', '')) }}</td>
+          </tr>
+          {% endif %}
+          {% if ngo.profile.get('12a_number') or ngo.profile.get('80g_number') %}
+          <tr>
+            <td>12A / 80G</td>
+            <td>
+              {% if ngo.profile.get('12a_number') %}12A: {{ ngo.profile['12a_number'] }}{% endif %}
+              {% if ngo.profile.get('12a_number') and ngo.profile.get('80g_number') %} &nbsp;|&nbsp; {% endif %}
+              {% if ngo.profile.get('80g_number') %}80G: {{ ngo.profile['80g_number'] }}{% endif %}
+            </td>
+          </tr>
+          {% endif %}
+          {% if ngo.profile.get('website') %}
+          <tr>
+            <td>Website</td>
+            <td><a href="{{ ngo.profile.website }}">{{ ngo.profile.website }}</a></td>
+          </tr>
+          {% endif %}
+          <tr>
+            <td>Total Disbursed</td>
+            <td><strong>₹{{ "{:,.0f}".format(ngo.total) }}</strong></td>
+          </tr>
+        </table>
+
+        <h6 class="fw-semibold mb-2" style="font-size:0.83rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted);">Transactions with this NGO</h6>
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount (INR)</th>
+              <th>Reference</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in ngo.donations | sort(attribute='created_at', reverse=True) %}
+            <tr>
+              <td>{{ d.get('created_at', '')[:10] if d.get('created_at') else '&mdash;' }}</td>
+              <td>₹{{ "{:,.0f}".format(d.get('amount', 0)) }}</td>
+              <td class="tx-ref">{{ report_id }}-{{ loop.index0 | string | zfill(4) }}</td>
+              <td>
+                <span class="badge" style="background:{% if d.get('status') == 'completed' %}#1a7a4a{% else %}#6c757d{% endif %}; color:#fff; font-size:0.75rem;">
+                  {{ d.get('status', 'recorded') | capitalize }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2">Sub-total &mdash; {{ ngo.name }}</td>
+              <td colspan="2">₹{{ "{:,.0f}".format(ngo.total) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="empty-state">No NGO partner transactions recorded for this period.</p>
+    {% endif %}
+  </div>
+
+  <!-- ================================================================
+       SECTION 4: COMPLETE DONATION LEDGER
+       ================================================================ -->
+  <div class="report-section break-before">
+    <div class="section-heading">
+      <span class="section-num">4</span>
+      Complete Donation Ledger
+    </div>
+    <p class="small text-muted mb-3">All transactions in reverse chronological order. Reference IDs prefixed with Report ID <strong>{{ report_id }}</strong>.</p>
+
+    {% if donations %}
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>NGO / Recipient</th>
+          <th>Amount (INR)</th>
+          <th>Reference ID</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in donations %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ d.get('created_at', '')[:10] if d.get('created_at') else '&mdash;' }}</td>
+          <td>{{ d.get('ngo_name', 'Unknown') }}</td>
+          <td>₹{{ "{:,.0f}".format(d.get('amount', 0)) }}</td>
+          <td class="tx-ref">{{ report_id }}-{{ (loop.index - 1) | string | zfill(4) }}</td>
+          <td>
+            <span class="badge" style="background:{% if d.get('status') == 'completed' %}#1a7a4a{% else %}#6c757d{% endif %}; color:#fff; font-size:0.75rem;">
+              {{ d.get('status', 'recorded') | capitalize }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3"><strong>Grand Total</strong></td>
+          <td colspan="3"><strong>₹{{ "{:,.0f}".format(total_donated) }}</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+    {% else %}
+      <p class="empty-state">No donations recorded in this financial year.</p>
+    {% endif %}
+  </div>
+
+  <!-- ================================================================
+       SECTION 5: ENVIRONMENTAL IMPACT ASSESSMENT
+       ================================================================ -->
+  <div class="report-section">
+    <div class="section-heading">
+      <span class="section-num">5</span>
+      Environmental Impact Assessment
+    </div>
+
+    <div class="impact-row">
+      <span class="impact-label">Trees Funded</span>
+      <span class="impact-value">{{ "{:,}".format(impact.trees_funded) }}<span class="impact-unit">mangrove saplings</span></span>
+    </div>
+    <div class="impact-row">
+      <span class="impact-label">Mangrove Area Restored</span>
+      <span class="impact-value">{{ impact.area_hectares }}<span class="impact-unit">hectares</span></span>
+    </div>
+    <div class="impact-row">
+      <span class="impact-label">CO&#8322; Sequestration (est.) *</span>
+      <span class="impact-value">{{ impact.carbon_low }}&ndash;{{ impact.carbon_high }}<span class="impact-unit">tonnes CO&#8322;e / year</span></span>
+    </div>
+    <div class="impact-row">
+      <span class="impact-label">Coastline Protected</span>
+      <span class="impact-value">~{{ impact.coastline_protected_km }}<span class="impact-unit">km</span></span>
+    </div>
+    <div class="impact-row">
+      <span class="impact-label">Fishing Families Supported</span>
+      <span class="impact-value">~{{ impact.fishing_families_supported }}<span class="impact-unit">households</span></span>
+    </div>
+
+    <p class="footnote">* {{ impact.methodology }}</p>
+  </div>
+
+  <!-- ================================================================
+       SECTION 6: DATA METHODOLOGY
+       ================================================================ -->
+  <div class="report-section">
+    <div class="section-heading">
+      <span class="section-num">6</span>
+      Data Methodology &amp; Satellite Data Sources
+    </div>
+
+    <p class="small mb-2">
+      Blue.AI tracks mangrove restoration progress using multi-temporal satellite imagery
+      processed on <strong>Google Earth Engine (GEE)</strong>. Area change detection and
+      canopy-cover estimation are derived from the following authoritative datasets:
+    </p>
+    <ul class="small mb-3">
+      <li><strong>Global Mangrove Watch (GMW) V3</strong> &mdash; JAXA / Aberystwyth University.
+          Provides baseline and change layers at 25m resolution (1996&ndash;present).</li>
+      <li><strong>Copernicus Sentinel-5P TROPOMI</strong> &mdash; European Space Agency.
+          Used for atmospheric CH&#8324; and NO&#8322; monitoring near restoration sites.</li>
+      <li><strong>Landsat 8/9 OLI</strong> &mdash; USGS / NASA.
+          NDVI and NDWI time-series for vegetation health monitoring.</li>
+    </ul>
+    <p class="small mb-0" style="color:var(--muted);">
+      Data source acknowledgement: <em>{{ data_source }}</em>
+    </p>
+    <p class="small mb-0 mt-2" style="color:var(--muted);">
+      Carbon sequestration figures are derived from: Alongi, D.M. (2014). Carbon cycling and
+      storage in mangrove forests. <em>Annual Review of Marine Science</em>, 6, 195&ndash;219;
+      and IUCN (2022). <em>Blue Carbon: The Role of Healthy Oceans in Binding Carbon</em>.
+    </p>
+  </div>
+
+  <!-- ================================================================
+       SECTION 7: DECLARATION &amp; SIGNATURES
+       ================================================================ -->
+  <div class="report-section">
+    <div class="section-heading">
+      <span class="section-num">7</span>
+      Declaration &amp; Authorisation
+    </div>
+
+    <p class="small mb-4">
+      We, the undersigned, hereby certify that the CSR activities described in this report
+      have been carried out in accordance with the CSR Policy of
+      <strong>{{ company.get('name', 'the Company') }}</strong> and as per the provisions of
+      Section 135 of the Companies Act, 2013, read with Schedule VII thereof, and the
+      Companies (CSR Policy) Rules, 2014, as amended.
+    </p>
+
+    <div class="signature-grid">
+      <div class="sig-box">
+        <div class="sig-line"></div>
+        <div class="sig-label">Authorised Signatory<br>(Company)</div>
+      </div>
+      <div class="sig-box">
+        <div class="sig-line"></div>
+        <div class="sig-label">NGO Coordinator<br>(Implementing Agency)</div>
+      </div>
+      <div class="sig-box">
+        <div class="sig-line"></div>
+        <div class="sig-label">Date &amp; Place</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       FOOTER STRIP
+       ================================================================ -->
+  <div class="report-footer-strip">
+    Generated by <strong>Blue.AI</strong> &nbsp;|&nbsp;
+    {{ report_date }} &nbsp;|&nbsp;
+    Report ID: <strong>{{ report_id }}</strong> &nbsp;|&nbsp;
+    <em>This is a system-generated document. Please verify data before formal submission.</em>
+  </div>
+
+</div><!-- /report-wrapper -->
+{% endblock %}
