@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
 from ..services.firebase_service import get_db
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 public_bp = Blueprint('public', __name__)
@@ -69,3 +70,17 @@ def ngo_details(ngo_id):
 @public_bp.route('/map-learnmore')
 def map_learnmore():
     return render_template('map-learnmore.html')
+
+@public_bp.route('/system/check-alerts', methods=['POST'])
+def check_alerts():
+    """Called by scheduled job (Render cron or external service)."""
+    # Simple API key protection
+    api_key = request.headers.get('X-API-Key') or request.form.get('api_key')
+    expected_key = os.environ.get('CRON_API_KEY', '')
+    if expected_key and api_key != expected_key:
+        return {'error': 'Unauthorized'}, 401
+    
+    from ..services.alert_service import check_and_send_alerts
+    from ..services.firebase_service import get_db
+    result = check_and_send_alerts(get_db())
+    return result, 200

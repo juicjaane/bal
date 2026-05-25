@@ -125,19 +125,18 @@ def profile():
     
     return render_template('ngo/profile.html', user=user_data)
 
-@ngo_bp.route('/patch-health')
+@ngo_bp.route('/alerts')
 @ngo_required
-def patch_health():
+def alerts():
     db = get_db()
-    area = 'Sundarbans, India'
+    recent_alerts = []
     if db:
         try:
-            doc = db.collection('users').document(session['user_id']).get()
-            if doc.exists:
-                area = doc.to_dict().get('area', area)
+            docs = list(db.collection('alert_log')
+                       .where('ngo_id', '==', session['user_id'])
+                       .order_by('sent_at', direction='DESCENDING')
+                       .limit(20).stream())
+            recent_alerts = [{'id': d.id, **d.to_dict()} for d in docs]
         except Exception as e:
-            logger.error(f"Area fetch: {e}")
-    
-    from ..services.health_tracker import assess_patch_health
-    health = assess_patch_health(area)
-    return render_template('ngo/patch-health.html', health=health, area=area)
+            logger.error(f"Alerts fetch: {e}")
+    return render_template('ngo/alerts.html', alerts=recent_alerts)
