@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Company Profile — Blue.AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+  <!-- Page Header -->
+  <div class="mb-4">
+    <h1 class="h3 fw-bold mb-1" style="color:#003e3f;">Company Profile</h1>
+    <p class="text-muted mb-0">Manage your company details and CSR documentation</p>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column -->
+    <div class="col-12 col-lg-4">
+
+      <!-- Profile Summary -->
+      <div class="card border-0 shadow-sm mb-4 text-center">
+        <div class="card-body py-4">
+          <div class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white mx-auto mb-3" style="width:80px;height:80px;background:#003e3f;font-size:2rem;">
+            {{ user.name[0].upper() if user.name else '?' }}
+          </div>
+          <h5 class="fw-bold mb-0" style="color:#003e3f;">{{ user.name or 'Your Company' }}</h5>
+          <p class="text-muted small mt-1 mb-0">{{ user.email }}</p>
+          <div class="mt-2">
+            <span class="badge rounded-pill px-3" style="background:#f97316;color:#fff;">Corporate</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificate Section -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-patch-check me-2" style="color:#00b4b6;"></i>CSR Certificate</h6>
+        </div>
+        <div class="card-body">
+          {% if user.certificate %}
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-file-earmark-check-fill" style="color:#16a34a;font-size:1.25rem;"></i>
+            <span class="fw-medium text-success">Certificate uploaded</span>
+          </div>
+          <a href="{{ user.certificate }}" target="_blank" class="btn btn-sm btn-outline-secondary w-100">
+            <i class="bi bi-eye me-1"></i>View Certificate
+          </a>
+          {% else %}
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-file-earmark-x" style="color:#9ca3af;font-size:1.25rem;"></i>
+            <span class="text-muted">No certificate uploaded</span>
+          </div>
+          <a href="mailto:support@blue.ai?subject=CSR Certificate Upload" class="btn btn-sm w-100" style="background:#003e3f;color:#fff;">
+            <i class="bi bi-envelope me-1"></i>Contact Support to Upload
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Account Info -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-shield-lock me-2" style="color:#00b4b6;"></i>Account Info</h6>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label small text-muted">Email (read-only)</label>
+            <input type="email" class="form-control" value="{{ user.email }}" readonly style="background:#f8fafa;">
+          </div>
+        </div>
+      </div>
+
+      <!-- CSR Compliance Note -->
+      <div class="card border-0 shadow-sm mb-4" style="background:linear-gradient(135deg,#003e3f,#005c5e);">
+        <div class="card-body">
+          <div class="d-flex gap-2 mb-2">
+            <i class="bi bi-building-check flex-shrink-0" style="color:#f97316;font-size:1.1rem;"></i>
+            <strong style="color:#f97316;">MCA 21 Compliance</strong>
+          </div>
+          <p class="small mb-2" style="color:rgba(255,255,255,0.85);line-height:1.6;">
+            Your donation history is available as a report for
+            <strong style="color:#00b4b6;">MCA 21 annual filings</strong> under Schedule VII of the Companies Act, 2013.
+          </p>
+          <a href="{{ url_for('corporate.impact') }}" class="btn btn-sm" style="background:#f97316;color:#fff;border:none;">
+            <i class="bi bi-file-earmark-bar-graph me-1"></i>Download Report
+          </a>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="card border-0 shadow-sm" style="border:1px solid #fecaca !important;">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-1" style="color:#be123c;"><i class="bi bi-exclamation-octagon me-2"></i>Danger Zone</h6>
+          <p class="small text-muted mb-2">Account deletion is permanent and cannot be undone.</p>
+          <a href="mailto:support@blue.ai?subject=Corporate Account Deletion Request" class="btn btn-sm btn-outline-danger w-100">Contact us to delete account</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Edit Form -->
+    <div class="col-12 col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-pencil-square me-2" style="color:#00b4b6;"></i>Edit Company Details</h6>
+        </div>
+        <div class="card-body py-4">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} border-0 shadow-sm mb-3">
+              <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>{{ message }}
+            </div>
+            {% endfor %}
+          {% endwith %}
+
+          <form method="POST" action="{{ url_for('corporate.profile') }}">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold small" style="color:#003e3f;">Company Name</label>
+                <input type="text" name="name" class="form-control" value="{{ user.name or '' }}" placeholder="e.g. Tata Consultancy Services Ltd.">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold small" style="color:#003e3f;">Phone Number</label>
+                <input type="tel" name="phone" class="form-control" value="{{ user.phone or '' }}" placeholder="+91 22 1234 5678">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small" style="color:#003e3f;">Registered Address</label>
+                <textarea name="address" class="form-control" rows="2" placeholder="Full registered address of the company">{{ user.address or '' }}</textarea>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small" style="color:#003e3f;">Website</label>
+                <input type="url" name="website" class="form-control" value="{{ user.website or '' }}" placeholder="https://yourcompany.com">
+              </div>
+              <div class="col-12 pt-2">
+                <button type="submit" class="btn px-4" style="background:#003e3f;color:#fff;">
+                  <i class="bi bi-check-lg me-1"></i>Save Changes
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

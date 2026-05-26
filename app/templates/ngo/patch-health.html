@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% block title %}Patch Health Monitor — Blue.AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Page Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h1 class="h3 fw-bold mb-1">Patch Health Monitor</h1>
+      <p class="text-muted mb-0">Real-time satellite-derived canopy health for your restoration area</p>
+    </div>
+    <span class="badge rounded-pill px-3 py-2" style="background:#0d9488;font-size:0.75rem;">
+      Powered by Google Earth Engine
+    </span>
+  </div>
+
+  {% if loading %}
+  <!-- Loading State -->
+  <div class="text-center py-5">
+    <div class="spinner-border text-success mb-3" style="width:3rem;height:3rem;"></div>
+    <p class="text-muted">Fetching satellite imagery for {{ area }}…</p>
+  </div>
+
+  {% elif health.get('error') and health.status == 'unknown' %}
+  <!-- Error / No Data State -->
+  <div class="alert alert-warning d-flex align-items-center gap-3">
+    <span style="font-size:2rem;">❓</span>
+    <div>
+      <strong>Health data unavailable</strong><br>
+      <small>{{ health.get('error', 'Could not retrieve satellite data. Please try again later.') }}</small>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- ===== MAIN HEALTH CARD ===== -->
+  <div class="card border-0 shadow-sm mb-4" style="border-left: 6px solid {{ health.color }} !important; border-radius:16px;">
+    <div class="card-body p-4">
+      <div class="row align-items-center">
+
+        <!-- Traffic Light Circle -->
+        <div class="col-auto text-center pe-4">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto"
+               style="width:110px;height:110px;background:{{ health.color }};box-shadow:0 4px 20px {{ health.color }}55;">
+            <span style="font-size:2.8rem;line-height:1;">{{ health.icon }}</span>
+          </div>
+        </div>
+
+        <!-- Status Text -->
+        <div class="col">
+          <p class="text-muted small mb-1 text-uppercase fw-semibold">Canopy Health Status</p>
+          <h2 class="fw-bold mb-1" style="color:{{ health.color }};font-size:2rem;">
+            Your Patch Is <span>{{ health.label }}</span>
+          </h2>
+
+          <p class="fs-5 mb-2">
+            <span class="fw-bold">{{ health.change_direction }} {{ health.change_pct }}%</span>
+            <span class="text-muted"> over 90 days</span>
+          </p>
+
+          <div class="d-flex flex-wrap gap-3">
+            <span class="badge bg-light text-dark border px-3 py-2">📍 Area: {{ area }}</span>
+            <span class="badge bg-light text-dark border px-3 py-2">
+              🕒 Last updated: {{ now.strftime('%d %b %Y') if now is defined else 'Today' }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WHAT THIS MEANS ===== -->
+  {% if health.status == 'improving' %}
+  <div class="alert border-0 mb-4" style="background:#f0fdf4;border-left:4px solid #16a34a !important;border-radius:12px;">
+    <h5 class="fw-bold" style="color:#16a34a;">Great news! 🌱</h5>
+    <p class="mb-0">Your mangrove canopy is showing increased photosynthetic activity compared to 90 days ago.
+      This indicates healthy growth and successful restoration. Keep up the excellent stewardship!</p>
+  </div>
+  {% elif health.status == 'stable' %}
+  <div class="alert border-0 mb-4" style="background:#fefce8;border-left:4px solid #ca8a04 !important;border-radius:12px;">
+    <h5 class="fw-bold" style="color:#ca8a04;">Holding Steady 📊</h5>
+    <p class="mb-0">Your patch is within normal variation. Canopy density is consistent with the 90-day baseline.
+      Continue monitoring and ensure water quality and tidal flow are maintained.</p>
+  </div>
+  {% elif health.status == 'declining' %}
+  <div class="alert border-0 mb-4" style="background:#fef2f2;border-left:4px solid #dc2626 !important;border-radius:12px;">
+    <h5 class="fw-bold" style="color:#dc2626;">⚠️ Attention Needed</h5>
+    <p class="mb-0">Your patch shows signs of canopy stress. Possible causes include saltwater intrusion,
+      human activity, disease, or recent storm damage. <strong>We recommend a field visit</strong>
+      and reporting observations to your local forest department.</p>
+  </div>
+  {% endif %}
+
+  <!-- ===== DETAILS ACCORDION ===== -->
+  <div class="accordion mb-4" id="healthDetails">
+    <div class="accordion-item border-0 shadow-sm" style="border-radius:12px;overflow:hidden;">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed fw-semibold" type="button"
+                data-bs-toggle="collapse" data-bs-target="#detailsPanel">
+          Technical Details
+        </button>
+      </h2>
+      <div id="detailsPanel" class="accordion-collapse collapse" data-bs-parent="#healthDetails">
+        <div class="accordion-body">
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <div class="p-3 bg-light rounded">
+                <p class="text-muted small mb-1 text-uppercase">NDVI Values</p>
+                <table class="table table-sm mb-0">
+                  <tbody>
+                    <tr>
+                      <td class="text-muted">Current (last 30 days)</td>
+                      <td class="fw-bold">{{ health.current_ndvi }}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted">Baseline (90 days ago)</td>
+                      <td class="fw-bold">{{ health.baseline_ndvi }}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted">Change</td>
+                      <td class="fw-bold" style="color:{{ health.color }}">
+                        {{ health.change_direction }} {{ health.change_pct }}%
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="p-3 bg-light rounded">
+                <p class="text-muted small mb-1 text-uppercase">Methodology</p>
+                <p class="small mb-2">90-day NDVI trend compared to 30-day baseline using Sentinel-2 SR imagery.
+                  Classification threshold: ±8% change from baseline.</p>
+                <p class="text-muted small mb-1 text-uppercase">Data Source</p>
+                <p class="small mb-2">{{ health.data_source }}</p>
+                <p class="text-muted small mb-1 text-uppercase">Assessment Period</p>
+                <p class="small mb-0">{{ health.assessment_period }}</p>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="p-3" style="background:#fffbeb;border-radius:8px;border:1px solid #fde68a;">
+                <small class="text-muted">
+                  <strong>Uncertainty note:</strong> NDVI-based health classification is indicative and subject to
+                  cloud cover, atmospheric conditions, and sensor availability. Values are median composites
+                  over 30-day windows. Field verification is recommended for declining status.
+                </small>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ACTION BUTTONS ===== -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-auto">
+      <a href="{{ url_for('ngo.insights') }}" class="btn btn-success px-4">
+        Generate Full Report
+      </a>
+    </div>
+    <div class="col-md-auto">
+      <a href="{{ url_for('ngo.profile') }}" class="btn btn-outline-secondary px-4">
+        View NGO Profile
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== SHARE NOTE ===== -->
+  <div class="alert alert-info border-0" style="background:#eff6ff;border-radius:12px;">
+    <small>
+      <strong>Visibility note:</strong> Your corporates can see this health status on your NGO profile.
+      A green or stable status builds trust and encourages continued funding.
+    </small>
+  </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}

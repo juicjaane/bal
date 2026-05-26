@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}Satellite Insights — Blue.AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+  <!-- Page Header -->
+  <div class="mb-4">
+    <h1 class="h3 fw-bold mb-1" style="color:#003e3f;">Satellite Insights</h1>
+    <p class="text-muted mb-0"><i class="bi bi-satellite me-1" style="color:#00b4b6;"></i>Powered by Google Earth Engine</p>
+  </div>
+
+  <!-- Report Generation Form -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-4">
+      <h6 class="fw-semibold mb-3" style="color:#003e3f;">Generate a Report</h6>
+      <form method="POST" id="reportForm">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-md-5">
+            <label class="form-label small fw-semibold text-muted">Report Type</label>
+            <select name="report_type" class="form-select" required>
+              <option value="" disabled {% if not report_type %}selected{% endif %}>Select report type…</option>
+              <option value="mangrove" {% if report_type == 'mangrove' %}selected{% endif %}>Mangrove Cover Analysis</option>
+              <option value="air" {% if report_type == 'air' %}selected{% endif %}>Air Quality (NO₂ &amp; SO₂)</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-4">
+            <button type="submit" class="btn w-100" id="generateBtn" style="background:#003e3f;color:#fff;">
+              <span id="btnText"><i class="bi bi-play-circle me-1"></i>Generate Report</span>
+              <span id="btnSpinner" class="d-none">
+                <span class="spinner-border spinner-border-sm me-2"></span>Generating… (30–60s)
+              </span>
+            </button>
+          </div>
+          <div class="col-12">
+            <p class="text-muted small mb-0">
+              <i class="bi bi-geo-alt me-1" style="color:#00b4b6;"></i>
+              Insights are generated for your registered area:
+              <strong style="color:#003e3f;">{{ area or 'Not set — update your profile' }}</strong>
+              {% if not area %}
+                &nbsp;<a href="{{ url_for('ngo.profile') }}" class="text-decoration-none" style="color:#f97316;">Update now →</a>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  {% if air_error %}
+  <div class="alert border-0 shadow-sm d-flex align-items-center gap-2 mb-4" style="background:#fff1f2;color:#be123c;">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ air_error }}</span>
+  </div>
+  {% endif %}
+
+  <!-- Mangrove Report -->
+  {% if report_type == 'mangrove' and map_html %}
+
+  <!-- Metric Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-sm-4">
+      <div class="card border-0 shadow-sm text-center" style="border-top:4px solid #00b4b6 !important;">
+        <div class="card-body py-4">
+          <div class="fw-bold fs-3" style="color:#003e3f;">{{ report_data.current_area }} km²</div>
+          <div class="text-muted small mt-1">Current Mangrove Area</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-4">
+      <div class="card border-0 shadow-sm text-center" style="border-top:4px solid #00b4b6 !important;">
+        <div class="card-body py-4">
+          <div class="fw-bold fs-3" style="color:#003e3f;">{{ "{:,}".format(report_data.current_trees) }}</div>
+          <div class="text-muted small mt-1">Estimated Trees</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-4">
+      <div class="card border-0 shadow-sm text-center" style="border-top:4px solid #00b4b6 !important;">
+        <div class="card-body py-4">
+          <div class="fw-bold fs-3" style="color:#003e3f;">{{ report_data.carbon_sequestered }} t/yr</div>
+          <div class="text-muted small mt-1">Carbon Offset</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mangrove Cover Map -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3">
+      <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-map me-2" style="color:#00b4b6;"></i>Mangrove Cover Map</h6>
+    </div>
+    <div class="card-body p-0" style="min-height:400px;">
+      {{ map_html | safe }}
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-graph-up me-2" style="color:#00b4b6;"></i>Mangrove Area Over Time</h6>
+        </div>
+        <div class="card-body text-center">
+          <img src="data:image/png;base64,{{ report_data.area_chart }}" class="img-fluid rounded" alt="Mangrove area over time" style="max-height:320px;">
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-tree me-2" style="color:#00b4b6;"></i>Estimated Tree Count</h6>
+        </div>
+        <div class="card-body text-center">
+          <img src="data:image/png;base64,{{ report_data.tree_chart }}" class="img-fluid rounded" alt="Tree count estimate" style="max-height:320px;">
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-heart-pulse me-2" style="color:#00b4b6;"></i>Tree Survival Rate</h6>
+        </div>
+        <div class="card-body text-center">
+          <img src="data:image/png;base64,{{ report_data.survival_chart }}" class="img-fluid rounded" alt="Tree survival rate" style="max-height:320px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+
+  <!-- Air Quality Report -->
+  {% if report_type == 'air' and air_chart %}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3">
+      <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-wind me-2" style="color:#00b4b6;"></i>Air Quality Report — NO₂ &amp; SO₂</h6>
+    </div>
+    <div class="card-body">
+      <img src="data:image/png;base64,{{ air_chart }}" class="img-fluid rounded mb-4" alt="Air quality chart">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <div class="p-3 rounded" style="background:#f0fafa;border-left:3px solid #00b4b6;">
+            <h6 class="fw-semibold" style="color:#003e3f;">What is NO₂?</h6>
+            <p class="small text-muted mb-0">
+              Nitrogen Dioxide (NO₂) is a pollutant from vehicle emissions and industrial activity.
+              High levels indicate urban pressure near your mangrove site. Values above
+              <strong>50 µmol/m²</strong> are considered elevated and may stress coastal vegetation.
+            </p>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div class="p-3 rounded" style="background:#f0fafa;border-left:3px solid #00b4b6;">
+            <h6 class="fw-semibold" style="color:#003e3f;">What is SO₂?</h6>
+            <p class="small text-muted mb-0">
+              Sulphur Dioxide (SO₂) originates from volcanic activity and coal combustion.
+              Elevated SO₂ can acidify coastal waters, harming mangrove root systems. Values above
+              <strong>1 DU (Dobson Units)</strong> warrant monitoring.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- About the Data -->
+  <div class="card border-0 shadow-sm" style="background:#f8fafa;">
+    <div class="card-body">
+      <div class="d-flex gap-2">
+        <i class="bi bi-info-circle flex-shrink-0 mt-1" style="color:#00b4b6;"></i>
+        <div>
+          <strong style="color:#003e3f;">About the Data</strong>
+          <p class="small text-muted mb-0 mt-1">
+            Mangrove extent data from <strong>Global Mangrove Watch (GMW) V3</strong> dataset.
+            Air quality from <strong>Copernicus Sentinel-5P</strong> TROPOMI instrument.
+            All data processed via <strong>Google Earth Engine</strong>.
+            Satellite imagery may have a 2–5 day processing lag.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('reportForm').addEventListener('submit', function() {
+  document.getElementById('btnText').classList.add('d-none');
+  document.getElementById('btnSpinner').classList.remove('d-none');
+  document.getElementById('generateBtn').disabled = true;
+});
+</script>
+{% endblock %}

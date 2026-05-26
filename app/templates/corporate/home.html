@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Corporate Dashboard — Blue.AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+  <!-- Page Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h1 class="h3 fw-bold mb-0" style="color:#003e3f;">Welcome, {{ user_name }}</h1>
+        <span class="badge rounded-pill px-3 py-1" style="background:#f97316;color:#fff;font-size:0.75rem;letter-spacing:0.04em;">Corporate</span>
+      </div>
+      <p class="text-muted mb-0">Your mangrove impact at a glance</p>
+    </div>
+    <a href="{{ url_for('corporate.profile') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-building me-1"></i>Company Profile
+    </a>
+  </div>
+
+  <!-- Impact Stat Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:52px;height:52px;background:rgba(0,180,182,0.12);font-size:1.5rem;">💰</div>
+          <div>
+            <div class="fw-bold fs-4 lh-1" style="color:#003e3f;">₹{{ "{:,.0f}".format(total_donated) }}</div>
+            <div class="text-muted small mt-1">Total Donated</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:52px;height:52px;background:rgba(0,180,182,0.12);font-size:1.5rem;">🌿</div>
+          <div>
+            <div class="fw-bold fs-4 lh-1" style="color:#003e3f;">{{ ngos_supported }}</div>
+            <div class="text-muted small mt-1">NGOs Supported</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:52px;height:52px;background:rgba(0,180,182,0.12);font-size:1.5rem;">🌳</div>
+          <div>
+            <div class="fw-bold fs-4 lh-1" style="color:#003e3f;">{{ "{:,}".format(trees_funded) }}</div>
+            <div class="text-muted small mt-1">Trees Funded</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm" style="border-left:4px solid #00b4b6 !important;">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:52px;height:52px;background:rgba(0,180,182,0.12);font-size:1.5rem;">🌍</div>
+          <div>
+            <div class="fw-bold fs-4 lh-1" style="color:#003e3f;">{{ carbon_offset }}</div>
+            <div class="text-muted small mt-1">CO₂ Offset (tonnes)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <h5 class="fw-semibold mb-3" style="color:#003e3f;">Quick Actions</h5>
+    </div>
+    <div class="col-12 col-md-6">
+      <a href="{{ url_for('corporate.donate') }}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 quick-action-card" style="transition:transform 0.18s,box-shadow 0.18s;cursor:pointer;">
+          <div class="card-body d-flex align-items-center gap-4 py-4">
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:60px;height:60px;background:linear-gradient(135deg,#003e3f,#00b4b6);">
+              <i class="bi bi-heart-fill text-white fs-4"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-5 mb-1" style="color:#003e3f;">Fund an NGO</div>
+              <div class="text-muted small">Find and support verified mangrove NGOs</div>
+            </div>
+            <i class="bi bi-arrow-right ms-auto" style="color:#f97316;font-size:1.25rem;"></i>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-12 col-md-6">
+      <a href="{{ url_for('corporate.impact') }}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 quick-action-card" style="transition:transform 0.18s,box-shadow 0.18s;cursor:pointer;">
+          <div class="card-body d-flex align-items-center gap-4 py-4">
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:60px;height:60px;background:linear-gradient(135deg,#00b4b6,#003e3f);">
+              <i class="bi bi-file-earmark-bar-graph-fill text-white fs-4"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-5 mb-1" style="color:#003e3f;">View Impact Report</div>
+              <div class="text-muted small">See your complete environmental impact</div>
+            </div>
+            <i class="bi bi-arrow-right ms-auto" style="color:#f97316;font-size:1.25rem;"></i>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Recent Donations -->
+    <div class="col-12 col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3">
+          <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-clock-history me-2" style="color:#00b4b6;"></i>Recent Donations</h6>
+          <a href="{{ url_for('corporate.impact') }}" class="btn btn-sm" style="background:#003e3f;color:#fff;">Full Report</a>
+        </div>
+        <div class="card-body p-0">
+          {% if recent_donations %}
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead style="background:#f8fafa;">
+                <tr>
+                  <th class="ps-4 py-3 text-muted small fw-semibold border-0">NGO</th>
+                  <th class="py-3 text-muted small fw-semibold border-0">AMOUNT</th>
+                  <th class="py-3 pe-4 text-muted small fw-semibold border-0">DATE</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for donation in recent_donations[:5] %}
+                <tr>
+                  <td class="ps-4 py-3 align-middle">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0" style="width:32px;height:32px;background:#00b4b6;font-size:0.75rem;">
+                        {{ donation.ngo_name[0].upper() if donation.ngo_name else '?' }}
+                      </div>
+                      <span class="fw-medium">{{ donation.ngo_name }}</span>
+                    </div>
+                  </td>
+                  <td class="py-3 align-middle fw-bold" style="color:#16a34a;">₹{{ "{:,.0f}".format(donation.amount) }}</td>
+                  <td class="py-3 pe-4 align-middle text-muted small">
+                    {{ donation.created_at.strftime('%d %b %Y') if donation.created_at else '—' }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <div style="font-size:3rem;">🌊</div>
+            <p class="text-muted mt-2 mb-0">No donations yet. <a href="{{ url_for('corporate.donate') }}" style="color:#00b4b6;">Fund your first NGO →</a></p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ESG Tip -->
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 shadow-sm h-100" style="background:linear-gradient(160deg,#003e3f 0%,#005c5e 60%,#007a7c 100%);color:#fff;">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-briefcase-fill" style="color:#f97316;font-size:1.25rem;"></i>
+            <span class="fw-semibold" style="color:#f97316;">CSR Compliance Tip</span>
+          </div>
+          <p class="small mb-3" style="color:rgba(255,255,255,0.85);line-height:1.7;">
+            Your donations may qualify for <strong style="color:#00b4b6;">CSR deduction</strong> under
+            <strong style="color:#00b4b6;">Section 135 of the Companies Act, 2013</strong>.
+            Download your impact report for compliance documentation.
+          </p>
+          <a href="{{ url_for('corporate.impact') }}" class="btn btn-sm" style="background:#f97316;color:#fff;border:none;">
+            <i class="bi bi-download me-1"></i>Download Impact Report
+          </a>
+          <hr style="border-color:rgba(255,255,255,0.2);margin:1rem 0;">
+          <p class="small mb-0" style="color:rgba(255,255,255,0.55);">Consult your CA for eligibility under Schedule VII of the Companies Act.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.quick-action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,62,63,0.12) !important;
+}
+</style>
+{% endblock %}

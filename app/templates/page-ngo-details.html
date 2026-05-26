@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.details-hero { background:linear-gradient(135deg,#003e3f,#006466); padding:7rem 0 4rem; color:white; }
+.stat-box { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:1.25rem; text-align:center; }
+.donate-card { background:white; border-radius:20px; padding:2rem; box-shadow:0 4px 30px rgba(0,62,63,0.12); position:sticky; top:100px; }
+.amount-btn { border:2px solid #e2f0f0; border-radius:10px; padding:10px; cursor:pointer; text-align:center; font-weight:700; color:#003e3f; transition:all 0.2s; background:white; }
+.amount-btn.selected, .amount-btn:hover { border-color:#003e3f; background:#003e3f; color:white; }
+.health-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; font-size:0.8rem; font-weight:600; }
+.health-IMPROVING { background:rgba(74,222,128,0.15); color:#16a34a; }
+.health-STABLE { background:rgba(251,191,36,0.15); color:#d97706; }
+.health-DECLINING { background:rgba(248,113,113,0.15); color:#dc2626; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if ngo %}
+<section class="details-hero">
+  <div class="container">
+    <a href="/donate-nologin" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;"><i class="bi bi-arrow-left me-1"></i>Back to NGOs</a>
+    <div class="row align-items-end g-4 mt-2">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-4 mb-3">
+          <div style="width:72px;height:72px;background:rgba(0,180,182,0.3);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#00e5e7;font-weight:700;">{{ ngo.name[0] | upper }}</div>
+          <div>
+            <h1 style="font-weight:800;font-size:2rem;margin:0;">{{ ngo.name }}</h1>
+            <p style="color:rgba(255,255,255,0.7);margin:0;"><i class="bi bi-geo-alt me-1"></i>{{ ngo.region | default(ngo.state) | default('India') }}</p>
+          </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap mb-4">
+          <span class="health-chip health-{{ ngo.health_status | default('STABLE') }}">&#9679; {{ ngo.health_status | default('Stable') | title }}</span>
+          {% if ngo.years_active %}<span style="background:rgba(255,255,255,0.15);color:white;padding:6px 14px;border-radius:20px;font-size:0.8rem;">{{ ngo.years_active }} years active</span>{% endif %}
+          <span style="background:rgba(0,180,182,0.2);color:#00b4b6;padding:6px 14px;border-radius:20px;font-size:0.8rem;">Satellite Monitored</span>
+        </div>
+        <div class="row g-3">
+          {% for label, val in [('Mangrove Area', (ngo.mangrove_area_km2|string + ' km²') if ngo.mangrove_area_km2 else '—'), ('Trees Planted', ngo.trees_planted | default('—')|string), ('Total Received', '₹' + (ngo.total_received|string) if ngo.total_received else 'Seeking funding'), ('Location', ngo.state | default('India'))] %}
+          <div class="col-6 col-md-3">
+            <div class="stat-box">
+              <div style="font-size:1.4rem;font-weight:800;">{{ val }}</div>
+              <div style="color:rgba(255,255,255,0.6);font-size:0.78rem;">{{ label }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:4rem 0;background:#f8fffe;">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        {% if ngo.mission %}
+        <div style="background:white;border-radius:16px;padding:2rem;margin-bottom:1.5rem;border:1px solid #e2f0f0;">
+          <h5 style="font-weight:700;color:#003e3f;margin-bottom:1rem;">Our Mission</h5>
+          <p class="text-muted" style="line-height:1.8;">{{ ngo.mission }}</p>
+        </div>
+        {% endif %}
+        <div style="background:white;border-radius:16px;padding:2rem;margin-bottom:1.5rem;border:1px solid #e2f0f0;">
+          <h5 style="font-weight:700;color:#003e3f;margin-bottom:1.5rem;">Satellite Monitoring Zone</h5>
+          {% if ngo.latitude and ngo.longitude %}
+          <div id="ngoMap" style="height:300px;border-radius:12px;overflow:hidden;"></div>
+          {% else %}
+          <div style="background:#f0fafa;border-radius:12px;padding:3rem;text-align:center;">
+            <p class="text-muted mb-0">Map coordinates not yet configured for this NGO.</p>
+          </div>
+          {% endif %}
+        </div>
+        <div style="background:white;border-radius:16px;padding:2rem;border:1px solid #e2f0f0;">
+          <h5 style="font-weight:700;color:#003e3f;margin-bottom:1.5rem;">Impact Data</h5>
+          <div class="row g-3">
+            {% for icon, label, val in [
+              ('🌱', 'Trees Planted', ngo.trees_planted | default('Not reported')),
+              ('🗳️', 'Mangrove Area', (ngo.mangrove_area_km2|string + ' km²') if ngo.mangrove_area_km2 else 'Not reported'),
+              ('📍', 'Monitoring Radius', (ngo.radius_km|string + ' km') if ngo.radius_km else 'Default (50 km)'),
+              ('📊', 'Health Status', ngo.health_status | default('Monitoring active'))
+            ] %}
+            <div class="col-md-6">
+              <div style="background:#f0fafa;border-radius:10px;padding:1rem;display:flex;gap:1rem;align-items:center;">
+                <span style="font-size:1.5rem;">{{ icon }}</span>
+                <div>
+                  <div style="font-size:0.75rem;color:#666;">{{ label }}</div>
+                  <div style="font-weight:700;color:#003e3f;">{{ val }}</div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="donate-card">
+          <h5 style="font-weight:800;color:#003e3f;margin-bottom:0.5rem;">Support This NGO</h5>
+          <p class="text-muted small mb-3">Your donation funds mangrove restoration with satellite-verified impact tracking.</p>
+          {% if session.user_type == 'corporate' %}
+          <form action="/corporate/process-donation" method="POST">
+            <input type="hidden" name="ngo_id" value="{{ ngo.id | default('') }}">
+            <input type="hidden" name="ngo_name" value="{{ ngo.name }}">
+            <label class="form-label fw-semibold small text-muted">Select Amount</label>
+            <div class="row g-2 mb-3">
+              {% for amt in [1000, 5000, 10000, 25000] %}
+              <div class="col-6"><div class="amount-btn" onclick="setAmount({{ amt }}, this)">₹{{ '{:,}'.format(amt) }}</div></div>
+              {% endfor %}
+            </div>
+            <input type="number" name="amount" id="amountInput" class="form-control mb-3" placeholder="Custom amount (₹)" min="100" style="border:2px solid #e2f0f0;border-radius:10px;">
+            <button type="submit" class="btn w-100 py-3" style="background:#003e3f;color:white;border-radius:12px;font-weight:700;">Donate <i class="bi bi-arrow-right ms-2"></i></button>
+          </form>
+          {% elif session.user_type == 'ngo' %}
+          <div class="alert" style="background:#f0fafa;border:none;border-radius:12px;">
+            <p class="mb-0 text-muted small">NGO accounts cannot make donations. <a href="/corporate-signup">Register as a corporate</a> to fund conservation.</p>
+          </div>
+          {% else %}
+          <div class="mb-3">
+            <div class="row g-2">
+              {% for amt in [1000, 5000, 10000, 25000] %}
+              <div class="col-6"><div class="amount-btn">₹{{ '{:,}'.format(amt) }}</div></div>
+              {% endfor %}
+            </div>
+          </div>
+          <a href="/login" class="btn w-100 py-3 mb-2" style="background:#003e3f;color:white;border-radius:12px;font-weight:700;">Sign In to Donate</a>
+          <a href="/corporate-signup" class="btn w-100 py-2" style="border:2px solid #003e3f;color:#003e3f;border-radius:12px;font-weight:600;">Create Corporate Account</a>
+          {% endif %}
+          <div style="background:#f0fafa;border-radius:10px;padding:1rem;margin-top:1rem;">
+            <p style="font-size:0.75rem;color:#666;margin:0;"><i class="bi bi-shield-check me-1" style="color:#003e3f;"></i>Every donation is satellite-tracked and CSR-2 compliant</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% else %}
+<div class="container" style="padding:8rem 1rem;text-align:center;">
+  <div style="font-size:4rem;margin-bottom:1rem;">🔍</div>
+  <h4 style="font-weight:700;color:#003e3f;">NGO Not Found</h4>
+  <p class="text-muted">This NGO profile does not exist or has been removed.</p>
+  <a href="/donate-nologin" class="btn btn-cta px-5">Browse All NGOs</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+{% if ngo and ngo.latitude and ngo.longitude %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const map = L.map('ngoMap').setView([{{ ngo.latitude }}, {{ ngo.longitude }}], 9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
+L.circle([{{ ngo.latitude }}, {{ ngo.longitude }}], {
+  radius: {{ (ngo.radius_km | default(50)) * 1000 }},
+  color: '#003e3f', fillColor: '#00b4b6', fillOpacity: 0.15, weight: 2
+}).addTo(map);
+L.marker([{{ ngo.latitude }}, {{ ngo.longitude }}]).addTo(map).bindPopup('<strong>{{ ngo.name }}</strong><br>Monitoring Zone').openPopup();
+</script>
+{% endif %}
+<script>
+let selectedAmount = null;
+function setAmount(amt, el) {
+  selectedAmount = amt;
+  document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('amountInput').value = amt;
+}
+</script>
+{% endblock %}

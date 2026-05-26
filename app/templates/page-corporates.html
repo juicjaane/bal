@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.corp-hero { background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); padding:8rem 0 5rem; color:white; position:relative; overflow:hidden; }
+.corp-hero::before { content:''; position:absolute; inset:0; background:url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=70') center/cover; opacity:0.07; }
+.corp-hero-content { position:relative; z-index:2; }
+.orange-badge { background:rgba(249,115,22,0.2); border:1px solid rgba(249,115,22,0.4); color:#fb923c; padding:6px 16px; border-radius:20px; font-size:0.8rem; letter-spacing:1px; text-transform:uppercase; display:inline-block; margin-bottom:1rem; }
+.value-card { border:1px solid #e2f0f0; border-radius:16px; padding:2rem; height:100%; background:white; transition:all 0.3s; }
+.value-card:hover { border-color:#f97316; box-shadow:0 8px 30px rgba(249,115,22,0.1); transform:translateY(-4px); }
+.step-card { border-radius:16px; padding:2rem; background:white; border:1px solid #e2f0f0; }
+.step-num { width:48px; height:48px; background:linear-gradient(135deg,#f97316,#ea580c); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:800; margin-bottom:1.25rem; }
+.compliance-card { background:linear-gradient(135deg,#003e3f,#006466); border-radius:20px; padding:2.5rem; color:white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="corp-hero">
+  <div class="container corp-hero-content">
+    <div class="row align-items-center g-5" style="min-height:50vh;">
+      <div class="col-lg-6">
+        <div class="orange-badge">For Corporate Partners</div>
+        <h1 style="font-weight:800;font-size:clamp(2rem,5vw,3.5rem);margin-bottom:1.5rem;line-height:1.1;">Turn CSR Spend into<br>Measurable Climate Action</h1>
+        <p style="color:rgba(255,255,255,0.8);font-size:1.1rem;line-height:1.7;margin-bottom:2.5rem;">Blue.AI connects your CSR investment directly to GPS-tracked mangrove restoration, with satellite-verified impact reports built for MCA CSR-2 compliance.</p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="/corporate-signup" class="btn btn-lg px-5 py-3" style="background:#f97316;color:white;border-radius:12px;font-weight:700;">Start Funding <i class="bi bi-arrow-right ms-2"></i></a>
+          <a href="/donate-nologin" class="btn btn-lg px-5 py-3" style="background:rgba(255,255,255,0.1);color:white;border:2px solid rgba(255,255,255,0.3);border-radius:12px;">Browse NGOs</a>
+        </div>
+      </div>
+      <div class="col-lg-5 offset-lg-1">
+        <div style="background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:2rem;">
+          <h6 style="color:white;font-weight:700;margin-bottom:1.5rem;">CSR Impact Dashboard Preview</h6>
+          {% for label, val, sub in [('Total Donated', '₹12.5 Lakhs', 'FY 2024-25'), ('Trees Funded', '24,600', 'Satellite-verified'), ('CO₂ Offset', '148 tonnes', 'Annual estimate'), ('CSR-2 Reports', '3 Generated', 'MCA-compliant')] %}
+          <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+            <span style="color:rgba(255,255,255,0.7);font-size:0.85rem;">{{ label }}</span>
+            <div class="text-end">
+              <span style="color:white;font-weight:700;">{{ val }}</span>
+              <span style="color:rgba(255,255,255,0.45);font-size:0.75rem;display:block;">{{ sub }}</span>
+            </div>
+          </div>
+          {% endfor %}
+          <a href="/corporate-signup" class="btn w-100 mt-3" style="background:#f97316;color:white;border-radius:10px;font-weight:600;">Create Your Account</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:6rem 0;background:#f8fffe;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 style="font-weight:800;color:#003e3f;font-size:2.5rem;">Why Mangrove CSR?</h2>
+      <p class="text-muted" style="max-width:500px;margin:0 auto;">Mangrove restoration delivers the highest impact per rupee of any nature-based CSR activity — verified by satellite, not self-reported.</p>
+    </div>
+    <div class="row g-4">
+      {% for icon, title, desc in [
+        ('📊', 'Highest Carbon ROI', 'Mangroves sequester 3–5× more carbon per hectare than rainforests. Your ₹ goes further here than any other nature-based solution.'),
+        ('🛡️', 'Schedule VII Eligible', "Mangrove conservation qualifies under Companies Act 2013, Schedule VII (iv) — environmental sustainability. Fully eligible for mandatory CSR spend."),
+        ('🛰️', 'Satellite-Verified', 'Impact isn’t self-reported. Google Earth Engine confirms tree survival, canopy growth, and zone health — giving your board room defensible proof.'),
+        ('📄', 'MCA CSR-2 Ready', 'Generate pre-filled regulatory reports with donation ledgers, NGO details, and environmental metrics. Attach to your annual return in minutes.'),
+        ('🌍', 'ESG Storyline', 'Blue.AI provides branded impact summaries, satellite imagery, and data visualisations for ESG reports, investor presentations, and sustainability disclosures.'),
+        ('🤝', 'Community Co-benefit', 'Every funded mangrove project supports coastal fishing communities — mapping SDG 1 (No Poverty), 14 (Life Below Water), and 15 (Life on Land).')
+      ] %}
+      <div class="col-md-6 col-lg-4">
+        <div class="value-card">
+          <div style="font-size:2rem;margin-bottom:1rem;">{{ icon }}</div>
+          <h6 style="font-weight:700;color:#003e3f;">{{ title }}</h6>
+          <p class="text-muted small mb-0">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section style="padding:6rem 0;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 style="font-weight:800;color:#003e3f;font-size:2.5rem;">How It Works for Corporates</h2>
+    </div>
+    <div class="row g-4">
+      {% for num, title, desc in [
+        (1, 'Register & Profile', 'Create your company account with CIN, CSR contact details, and sector. Takes 3 minutes.'),
+        (2, 'Discover NGOs', 'Browse verified mangrove NGOs by state, health score, area size, and impact metrics. Filter by your preferred geography.'),
+        (3, 'Donate with Purpose', 'Select an NGO and donation amount. Your funds go directly to the NGO’s registered bank account. Instant digital receipt.'),
+        (4, 'Track in Real Time', 'Your corporate dashboard shows trees funded, CO₂ offset, mangrove zone health — updated from satellite data automatically.'),
+        (5, 'Generate CSR Report', 'One click generates a fully formatted MCA CSR-2 compatible PDF with all regulatory fields pre-filled from your donation data.')
+      ] %}
+      <div class="col-md-6 col-lg-4">
+        <div class="step-card">
+          <div class="step-num">{{ num }}</div>
+          <h6 style="font-weight:700;color:#003e3f;">{{ title }}</h6>
+          <p class="text-muted small mb-0">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+      <div class="col-md-6 col-lg-4 d-flex align-items-center">
+        <div style="text-align:center;padding:2rem;width:100%;">
+          <div style="font-size:4rem;margin-bottom:1rem;">🔖</div>
+          <p class="text-muted">The entire cycle from signup to CSR report takes less than one working day.</p>
+          <a href="/corporate-signup" class="btn btn-cta px-4 py-2" style="border-radius:10px;">Get Started Today</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#f8fffe;padding:6rem 0;">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <h2 style="font-weight:800;color:#003e3f;font-size:2.5rem;margin-bottom:1.5rem;">Regulatory Compliance Made Simple</h2>
+        <p class="text-muted mb-4">Companies with net worth ≥ ₹500 crore, turnover ≥ ₹1,000 crore, or net profit ≥ ₹5 crore must spend 2% of average net profits on CSR. Mangrove restoration qualifies under multiple Schedule VII heads.</p>
+        {% for item in ['Full audit trail from donation to satellite-verified impact', 'Geotagged project coordinates for site visit readiness', 'Third-party data source (Google Earth Engine) for credibility', 'NGO 12A/80G registration documentation stored on platform', 'Annual impact summary for board CSR committee reporting'] %}
+        <div class="d-flex align-items-start gap-3 mb-3">
+          <i class="bi bi-check-circle-fill" style="color:#003e3f;margin-top:2px;flex-shrink:0;"></i>
+          <p class="mb-0 text-muted">{{ item }}</p>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="col-lg-6">
+        <div class="compliance-card">
+          <h5 style="font-weight:700;margin-bottom:0.5rem;">CSR-2 Report Preview</h5>
+          <p style="color:rgba(255,255,255,0.7);font-size:0.85rem;margin-bottom:2rem;">Auto-generated for every financial year</p>
+          {% for field, val in [('Company CIN', 'L17110MH1973PLC019786'), ('Financial Year', '2024–25'), ('Total CSR Spend', '₹12,50,000'), ('Mode of CSR', 'Through Implementing Agency'), ('Implementing Agency', 'Sundarbans Eco Foundation'), ('Project Location', 'West Bengal — 21.9°N, 88.2°E'), ('Satellite Verification', 'Google Earth Engine • GMW V3'), ('Trees Funded (est.)', '24,600 mangroves'), ('CO₂ Offset (est.)', '148 tonnes / year')] %}
+          <div class="d-flex justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.1);font-size:0.82rem;">
+            <span style="color:rgba(255,255,255,0.6);">{{ field }}</span>
+            <span style="color:white;font-weight:600;">{{ val }}</span>
+          </div>
+          {% endfor %}
+          <a href="/corporate-signup" class="btn w-100 mt-4" style="background:#f97316;color:white;border-radius:10px;font-weight:700;">Generate Your Report <i class="bi bi-arrow-right ms-2"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#003e3f;padding:5rem 0;text-align:center;">
+  <div class="container">
+    <h2 style="color:white;font-weight:800;font-size:2.5rem;margin-bottom:1rem;">Ready to Fund Verified Change?</h2>
+    <p style="color:rgba(255,255,255,0.75);max-width:500px;margin:0 auto 2.5rem;">Join 8+ corporations already funding satellite-monitored mangrove restoration with Blue.AI.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="/corporate-signup" class="btn btn-lg px-5 py-3" style="background:#f97316;color:white;border-radius:12px;font-weight:700;">Create Account <i class="bi bi-arrow-right ms-2"></i></a>
+      <a href="/donate-nologin" class="btn btn-lg btn-outline-light px-5 py-3" style="border-radius:12px;">Browse NGOs First</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.login-wrapper { min-height: 100vh; display: flex; align-items: stretch; }
+.login-visual {
+    background: linear-gradient(160deg, #003e3f 0%, #006466 60%, #00b4b6 100%);
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 4rem; position: relative; overflow: hidden;
+}
+.login-visual::before {
+    content: ''; position: absolute; inset: 0;
+    background: url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=60') center/cover;
+    opacity: 0.1;
+}
+.login-form-panel { display: flex; flex-direction: column; justify-content: center; padding: 4rem; background: white; }
+.role-tab {
+    border: 2px solid #e2f0f0; border-radius: 12px; padding: 12px 20px;
+    cursor: pointer; transition: all 0.2s; text-align: center; flex: 1;
+}
+.role-tab.active { border-color: #003e3f; background: #003e3f; color: white; }
+.role-tab:not(.active):hover { border-color: #006466; color: #006466; }
+.form-control-modern { border: 2px solid #e2f0f0; border-radius: 10px; padding: 12px 16px; transition: border-color 0.2s; }
+.form-control-modern:focus { border-color: #003e3f; box-shadow: 0 0 0 3px rgba(0,62,63,0.1); outline: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-wrapper" style="margin-top:-80px;padding-top:80px;">
+  <div class="row g-0 w-100">
+    <div class="col-lg-5 login-visual d-none d-lg-flex flex-column">
+      <div style="position:relative;z-index:2;">
+        <a href="/" style="text-decoration:none;display:inline-flex;align-items:center;gap:10px;margin-bottom:3rem;">
+          <div style="width:36px;height:36px;background:#00b4b6;border-radius:8px;display:flex;align-items:center;justify-content:center;">🌿</div>
+          <span style="color:white;font-weight:800;font-size:1.2rem;">Blue.AI</span>
+        </a>
+        <h2 style="color:white;font-weight:800;font-size:2.2rem;line-height:1.2;margin-bottom:1.5rem;">Protecting India's Mangroves with Satellite Intelligence</h2>
+        <p style="color:rgba(255,255,255,0.75);line-height:1.8;margin-bottom:3rem;">Sign in to access your dashboard — whether you're an NGO monitoring restoration zones or a corporate tracking CSR impact.</p>
+        <div style="background:rgba(255,255,255,0.1);border-radius:16px;padding:1.5rem;">
+          {% for icon, title, sub in [('🛰️', 'Real-time Satellite Data', 'Sentinel-2 + Google Earth Engine'), ('📊', 'CSR-Compliant Reports', 'MCA CSR-2 format, ready to file'), ('🌱', 'Verified Impact', 'Satellite-confirmed tree survival rates')] %}
+          <div class="d-flex align-items-center gap-3 {{ 'mb-3' if not loop.last else '' }}">
+            <span style="font-size:1.5rem;">{{ icon }}</span>
+            <div>
+              <p style="color:white;font-weight:600;margin:0;font-size:0.9rem;">{{ title }}</p>
+              <p style="color:rgba(255,255,255,0.6);margin:0;font-size:0.8rem;">{{ sub }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7 login-form-panel">
+      <div style="max-width:420px;width:100%;margin:0 auto;">
+        <div class="d-lg-none mb-4 text-center">
+          <a href="/" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+            <div style="width:32px;height:32px;background:#003e3f;border-radius:7px;display:flex;align-items:center;justify-content:center;">🌿</div>
+            <span style="color:#003e3f;font-weight:800;font-size:1.1rem;">Blue.AI</span>
+          </a>
+        </div>
+        <h3 style="font-weight:800;color:#003e3f;margin-bottom:0.5rem;">Welcome back</h3>
+        <p class="text-muted mb-4">Sign in to your Blue.AI account</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show rounded-3 mb-4">
+          {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}{% endif %}{% endwith %}
+        <div class="d-flex gap-2 mb-4">
+          <div class="role-tab active" id="tab-ngo" onclick="selectRole('ngo')">
+            <div style="font-size:1.2rem;">🌿</div>
+            <div style="font-size:0.8rem;font-weight:600;">NGO</div>
+          </div>
+          <div class="role-tab" id="tab-corporate" onclick="selectRole('corporate')">
+            <div style="font-size:1.2rem;">🏢</div>
+            <div style="font-size:0.8rem;font-weight:600;">Corporate</div>
+          </div>
+        </div>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <input type="hidden" id="roleInput" name="role" value="ngo">
+          <input type="hidden" id="idTokenInput" name="id_token" value="">
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-muted small">Email Address</label>
+            <input type="email" id="emailInput" class="form-control form-control-modern" placeholder="you@yourorg.org" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-muted small">Password</label>
+            <div class="position-relative">
+              <input type="password" id="passwordInput" class="form-control form-control-modern" placeholder="••••••••" required>
+              <button type="button" onclick="togglePwd()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#666;cursor:pointer;">
+                <i class="bi bi-eye" id="eyeIcon"></i>
+              </button>
+            </div>
+          </div>
+          <div id="loginError" class="alert alert-danger d-none rounded-3 mb-3 small"></div>
+          <button type="submit" id="loginBtn" class="btn w-100 py-3" style="background:#003e3f;color:white;border-radius:12px;font-weight:700;font-size:1rem;">Sign In</button>
+        </form>
+        <div class="text-center mt-4">
+          <p class="text-muted small mb-0">
+            Don't have an account?
+            <span id="linkNgo"><a href="/ngo-signup" style="color:#003e3f;font-weight:600;">Register as NGO</a></span>
+            <span id="linkCorp" class="d-none"><a href="/corporate-signup" style="color:#003e3f;font-weight:600;">Register as Corporate</a></span>
+          </p>
+        </div>
+        <div class="text-center mt-3">
+          <a href="/" style="color:#666;font-size:0.85rem;"><i class="bi bi-arrow-left me-1"></i>Back to home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+const cfg = {
+  apiKey: "{{ config.get('FIREBASE_API_KEY','') }}",
+  authDomain: "{{ config.get('FIREBASE_AUTH_DOMAIN','') }}",
+  projectId: "{{ config.get('FIREBASE_PROJECT_ID','') }}"
+};
+let fbAuth;
+try { fbAuth = getAuth(initializeApp(cfg)); } catch(e) { console.warn('Firebase init:', e); }
+window._handleLogin = async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const errDiv = document.getElementById('loginError');
+  const email = document.getElementById('emailInput').value;
+  const password = document.getElementById('passwordInput').value;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing in...';
+  errDiv.classList.add('d-none');
+  try {
+    if (fbAuth) {
+      const cred = await signInWithEmailAndPassword(fbAuth, email, password);
+      document.getElementById('idTokenInput').value = await cred.user.getIdToken();
+    }
+    const fd = new FormData();
+    fd.append('id_token', document.getElementById('idTokenInput').value);
+    fd.append('email', email);
+    fd.append('role', document.getElementById('roleInput').value);
+    const res = await fetch('/login', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) { window.location.href = data.redirect || '/'; }
+    else { errDiv.textContent = data.error || 'Invalid credentials.'; errDiv.classList.remove('d-none'); btn.disabled = false; btn.textContent = 'Sign In'; }
+  } catch(err) {
+    const msgs = { 'auth/wrong-password': 'Incorrect password.', 'auth/invalid-credential': 'Incorrect email or password.', 'auth/user-not-found': 'No account with this email.', 'auth/too-many-requests': 'Too many attempts. Try again later.' };
+    errDiv.textContent = msgs[err.code] || 'Login failed. Please try again.';
+    errDiv.classList.remove('d-none');
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+};
+document.getElementById('loginForm').addEventListener('submit', window._handleLogin);
+</script>
+<script>
+function selectRole(r) {
+  document.getElementById('roleInput').value = r;
+  document.getElementById('tab-ngo').classList.toggle('active', r==='ngo');
+  document.getElementById('tab-corporate').classList.toggle('active', r==='corporate');
+  document.getElementById('linkNgo').classList.toggle('d-none', r!=='ngo');
+  document.getElementById('linkCorp').classList.toggle('d-none', r!=='corporate');
+}
+function togglePwd() {
+  const i = document.getElementById('passwordInput');
+  const icon = document.getElementById('eyeIcon');
+  i.type = i.type === 'password' ? 'text' : 'password';
+  icon.className = i.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+}
+</script>
+{% endblock %}

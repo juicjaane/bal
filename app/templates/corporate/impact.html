@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Environmental Impact Report — Blue.AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4" id="impactReport">
+
+  <!-- Page Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 print-header">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Blue.AI" height="32" onerror="this.style.display='none'">
+        <h1 class="h3 fw-bold mb-0" style="color:#003e3f;">Environmental Impact Report</h1>
+      </div>
+      <p class="text-muted mb-0">ESG Report &nbsp;·&nbsp; Generated {{ now.strftime('%d %B %Y') if now else '' }}</p>
+    </div>
+    <div class="d-flex gap-2 no-print">
+      <button onclick="window.print()" class="btn" style="background:#003e3f;color:#fff;">
+        <i class="bi bi-printer me-1"></i>Print / Save PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Hero Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm text-center" style="border-top:4px solid #003e3f !important;">
+        <div class="card-body py-4">
+          <div class="fw-bold" style="font-size:2rem;color:#003e3f;">₹{{ "{:,.0f}".format(total) }}</div>
+          <div class="text-muted small mt-1">Total Invested</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm text-center" style="border-top:4px solid #00b4b6 !important;">
+        <div class="card-body py-4">
+          <div class="fw-bold" style="font-size:2rem;color:#003e3f;">{{ "{:,}".format(trees_funded) }}</div>
+          <div class="text-muted small mt-1">Trees Funded</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm text-center" style="border-top:4px solid #00b4b6 !important;">
+        <div class="card-body py-4">
+          <div class="fw-bold" style="font-size:2rem;color:#003e3f;">{{ carbon_offset }}</div>
+          <div class="text-muted small mt-1">Tonnes CO₂ Offset/yr</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm text-center" style="border-top:4px solid #f97316 !important;">
+        <div class="card-body py-4">
+          <div class="fw-bold" style="font-size:2rem;color:#003e3f;">{{ area_restored }}</div>
+          <div class="text-muted small mt-1">km² Restored</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- NGO Breakdown -->
+    <div class="col-12 col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-pie-chart me-2" style="color:#00b4b6;"></i>Funding by NGO</h6>
+        </div>
+        <div class="card-body">
+          {% if ngo_breakdown %}
+            {% set ns = namespace(max_val=0) %}
+            {% for name, amount in ngo_breakdown.items() %}
+              {% if amount > ns.max_val %}{% set ns.max_val = amount %}{% endif %}
+            {% endfor %}
+            {% for name, amount in ngo_breakdown.items() %}
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0" style="width:28px;height:28px;background:#003e3f;font-size:0.7rem;">
+                    {{ name[0].upper() if name else '?' }}
+                  </div>
+                  <span class="small fw-medium" style="color:#003e3f;">{{ name }}</span>
+                </div>
+                <span class="small fw-bold" style="color:#00b4b6;">₹{{ "{:,.0f}".format(amount) }}</span>
+              </div>
+              <div class="progress" style="height:6px;border-radius:3px;">
+                <div class="progress-bar" style="width:{{ ((amount / ns.max_val) * 100) | int }}%;background:#00b4b6;border-radius:3px;"></div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <p class="text-muted small text-center py-3">No donations recorded yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Donation Timeline -->
+    <div class="col-12 col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="fw-semibold mb-0" style="color:#003e3f;"><i class="bi bi-list-ul me-2" style="color:#00b4b6;"></i>Donation Timeline</h6>
+        </div>
+        <div class="card-body p-0">
+          {% if donations %}
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead style="background:#f8fafa;">
+                <tr>
+                  <th class="ps-4 py-3 text-muted small fw-semibold border-0">DATE</th>
+                  <th class="py-3 text-muted small fw-semibold border-0">NGO</th>
+                  <th class="py-3 pe-4 text-muted small fw-semibold border-0">AMOUNT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for d in donations | sort(attribute='created_at', reverse=True) %}
+                <tr>
+                  <td class="ps-4 py-3 align-middle text-muted small">
+                    {{ d.created_at.strftime('%d %b %Y') if d.created_at else '—' }}
+                  </td>
+                  <td class="py-3 align-middle">
+                    <span class="fw-medium">{{ d.ngo_name }}</span>
+                  </td>
+                  <td class="py-3 pe-4 align-middle fw-bold" style="color:#16a34a;">₹{{ "{:,.0f}".format(d.amount) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <p class="text-muted">No donations yet.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Methodology Note -->
+  <div class="card border-0 shadow-sm" style="background:#f8fafa;">
+    <div class="card-body">
+      <div class="d-flex gap-2">
+        <i class="bi bi-calculator flex-shrink-0 mt-1" style="color:#00b4b6;"></i>
+        <div>
+          <strong style="color:#003e3f;">Impact Calculation Methodology</strong>
+          <p class="small text-muted mb-0 mt-1">
+            Based on <strong>500 trees/km²</strong> planting density.
+            Carbon sequestration rate: <strong>6.7 tonnes CO₂/ha/year</strong> for mangroves
+            (IUCN 2022 data). Average restoration cost: <strong>₹10/tree</strong>.
+            All figures are estimates and may vary by site conditions.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+@media print {
+  .no-print { display: none !important; }
+  .sidebar, nav, footer { display: none !important; }
+  body { font-size: 12px; }
+  .card { break-inside: avoid; }
+  #impactReport { padding: 0 !important; }
+  .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+}
+</style>
+{% endblock %}
