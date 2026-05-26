@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+.hero-section {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #003e3f 0%, #006466 50%, #00b4b6 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+.hero-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1920&q=80') center/cover;
+    opacity: 0.12;
+}
+.hero-content { position: relative; z-index: 2; }
+.hero-badge {
+    background: rgba(0,180,182,0.2);
+    border: 1px solid rgba(0,180,182,0.4);
+    color: #00b4b6;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+.hero-title {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+.hero-title span { color: #00b4b6; }
+.hero-subtitle {
+    font-size: 1.15rem;
+    color: rgba(255,255,255,0.8);
+    max-width: 500px;
+    margin-bottom: 2.5rem;
+    line-height: 1.7;
+}
+.hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+.hero-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    flex-wrap: wrap;
+}
+.hero-stat-num { font-size: 2rem; font-weight: 800; color: #fff; }
+.hero-stat-label { color: rgba(255,255,255,0.6); font-size: 0.85rem; }
+.map-pulse {
+    width: 10px; height: 10px;
+    background: #00b4b6;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,180,182,0.7); }
+    50% { box-shadow: 0 0 0 8px rgba(0,180,182,0); }
+}
+.hero-map-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 2rem;
+    color: white;
+    max-width: 360px;
+}
+.section-badge {
+    background: rgba(0,62,63,0.08);
+    border: 1px solid rgba(0,62,63,0.15);
+    color: #006466;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+.feature-card {
+    border: 1px solid #e2f0f0;
+    border-radius: 16px;
+    padding: 2rem;
+    height: 100%;
+    transition: all 0.3s ease;
+    background: white;
+}
+.feature-card:hover {
+    border-color: #00b4b6;
+    box-shadow: 0 8px 30px rgba(0,62,63,0.12);
+    transform: translateY(-4px);
+}
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1.25rem;
+    display: block;
+}
+.ngo-card {
+    border: 1px solid #e2f0f0;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s;
+    background: white;
+    height: 100%;
+}
+.ngo-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,62,63,0.15); }
+.ngo-card-header {
+    background: linear-gradient(135deg, #003e3f, #006466);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.ngo-avatar {
+    width: 48px; height: 48px;
+    background: rgba(0,180,182,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; color: #00e5e7; font-weight: 700;
+    flex-shrink: 0;
+}
+.cta-card { border-radius: 24px; padding: 3rem; height: 100%; }
+.cta-card-ngo { background: linear-gradient(135deg, #003e3f, #006466); color: white; }
+.cta-card-corp { background: linear-gradient(135deg, #f97316, #ea580c); color: white; }
+.step-num {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #003e3f, #006466);
+    color: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 800;
+    margin: 0 auto 1.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center g-5" style="min-height:90vh; padding:120px 0 80px;">
+      <div class="col-lg-6 hero-content">
+        <div class="hero-badge"><span class="map-pulse"></span>Powered by Google Earth Engine</div>
+        <h1 class="hero-title">Save India's<br><span>Mangrove Forests</span><br>Together</h1>
+        <p class="hero-subtitle">Blue.AI connects NGOs restoring mangroves with corporations funding sustainability. Real-time satellite intelligence. Verifiable impact. Measurable change.</p>
+        <div class="hero-ctas">
+          <a href="/ngos" class="btn btn-cta btn-lg px-5 py-3"><i class="bi bi-tree me-2"></i>I'm an NGO</a>
+          <a href="/corporates" class="btn btn-lg px-5 py-3" style="background:rgba(255,255,255,0.15);color:white;border:2px solid rgba(255,255,255,0.4);backdrop-filter:blur(10px);border-radius:12px;"><i class="bi bi-building me-2"></i>I'm a Corporate</a>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <div class="hero-stat-num" data-counter="{{ stats.total_mangrove_area_km2 | default(4975) }}">0</div>
+            <div class="hero-stat-label">km² Monitored</div>
+          </div>
+          <div>
+            <div class="hero-stat-num" data-counter="{{ stats.ngo_count | default(12) }}">0</div>
+            <div class="hero-stat-label">NGOs Active</div>
+          </div>
+          <div>
+            <div class="hero-stat-num" data-counter="{{ stats.total_donations_lakhs | default(38) }}">0</div>
+            <div class="hero-stat-label">Lakhs ₹ Donated</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 d-none d-lg-flex justify-content-center">
+        <div class="hero-map-card">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0" style="font-weight:700;">Live Mangrove Monitor</h6>
+            <span style="background:rgba(0,229,231,0.2);color:#00e5e7;padding:3px 10px;border-radius:20px;font-size:0.72rem;">&#9679; LIVE</span>
+          </div>
+          {% for name, pct, trend, color in [('Sundarbans Delta', 78, '+2.1%', '#4ade80'), ('Pichavaram Reserve', 62, '+1.4%', '#4ade80'), ('Gulf of Khambhat', 45, '-0.3%', '#fbbf24')] %}
+          <div style="background:rgba(0,62,63,0.6);border-radius:12px;padding:1rem;margin-bottom:0.75rem;font-size:0.85rem;">
+            <div class="d-flex justify-content-between mb-2">
+              <span style="color:rgba(255,255,255,0.7);">{{ name }}</span>
+              <span style="color:{{ color }};font-weight:600;">{{ trend }}</span>
+            </div>
+            <div class="progress" style="height:6px;background:rgba(255,255,255,0.1);">
+              <div class="progress-bar" style="width:{{ pct }}%;background:#00b4b6;"></div>
+            </div>
+          </div>
+          {% endfor %}
+          <p style="color:rgba(255,255,255,0.35);font-size:0.7rem;text-align:center;margin:1rem 0 0;">Sentinel-2 satellite imagery</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="padding:6rem 0;background:#f8fffe;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-badge">How It Works</div>
+      <h2 style="font-weight:800;color:#003e3f;font-size:2.5rem;">From Satellite to Impact</h2>
+      <p class="text-muted" style="max-width:480px;margin:0 auto;">Three steps connect satellite data to real-world mangrove restoration funding.</p>
+    </div>
+    <div class="row g-4 text-center">
+      {% for num, title, desc in [
+        (1, 'NGO Registers Zone', 'Restoration NGOs define their geographic area. Our satellite system begins monitoring mangrove health in real time using Google Earth Engine.'),
+        (2, 'AI Generates Reports', 'Sentinel-2 computes mangrove extent, tree survival rates, NDVI health scores, and air quality — creating verifiable impact data for every zone.'),
+        (3, 'Corporate Funds Change', 'Companies browse verified NGOs, donate for CSR compliance, and receive satellite-verified impact reports ready for regulatory filing.')
+      ] %}
+      <div class="col-md-4">
+        <div class="step-num">{{ num }}</div>
+        <h5 style="font-weight:700;color:#003e3f;">{{ title }}</h5>
+        <p class="text-muted">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section style="padding:6rem 0;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-badge">Platform Capabilities</div>
+      <h2 style="font-weight:800;color:#003e3f;font-size:2.5rem;">Built for Real Impact</h2>
+    </div>
+    <div class="row g-4">
+      {% for icon, title, desc in [
+        ('🛰️', 'Satellite Mangrove Mapping', 'Global Mangrove Watch V3 + Sentinel-2 tracks canopy cover change, health indices, and deforestation alerts at 10-metre resolution.'),
+        ('🌬️', 'Air Quality Monitoring', 'Sentinel-5P monthly NO₂ and SO₂ concentrations overlaid with mangrove zones reveals correlation between forest health and local air quality.'),
+        ('📊', 'CSR-Compliant Reports', 'Generate MCA CSR-2 compatible impact reports with donation ledgers, environmental metrics, and regulatory disclosures — ready to file.'),
+        ('🌱', 'Carbon Sequestration Model', 'Estimate carbon tonnes sequestered using species-specific biomass models. Connect donations directly to verified CO₂ offset calculations.'),
+        ('🚨', 'Automated Health Alerts', 'NGOs receive email alerts when NDVI trend analysis detects declining patch health — enabling early intervention before significant loss occurs.'),
+        ('🤝', 'Smart NGO Discovery', 'Corporates filter NGOs by state, mangrove area, health status, and impact metrics. Map and grid views to find the right conservation partner.')
+      ] %}
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <span class="feature-icon">{{ icon }}</span>
+          <h6 style="font-weight:700;color:#003e3f;">{{ title }}</h6>
+          <p class="text-muted small mb-0">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT NUMBERS -->
+<section style="background:linear-gradient(135deg,#003e3f,#006466);padding:6rem 0;">
+  <div class="container text-center">
+    <div class="section-badge" style="background:rgba(0,180,182,0.2);border-color:rgba(0,180,182,0.4);color:#00b4b6;">Impact So Far</div>
+    <h2 style="font-weight:800;color:white;font-size:2.5rem;margin:0.5rem 0 4rem;">Numbers That Matter</h2>
+    <div class="row g-4">
+      {% for val, label in [
+        (stats.total_mangrove_area_km2 | default(4975), 'km² Monitored'),
+        (stats.trees_planted | default(180000), 'Trees Funded'),
+        (stats.carbon_tonnes | default(2240), 'Tonnes CO₂ Offset'),
+        (stats.corporate_count | default(8), 'Corporate Partners')
+      ] %}
+      <div class="col-6 col-md-3">
+        <div style="font-size:3rem;font-weight:900;color:#00b4b6;" data-counter="{{ val }}">0</div>
+        <p style="color:rgba(255,255,255,0.7);">{{ label }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- NGO SHOWCASE -->
+<section style="padding:6rem 0;background:#f8fffe;">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-5 flex-wrap gap-3">
+      <div>
+        <div class="section-badge">Verified Partners</div>
+        <h2 style="font-weight:800;color:#003e3f;font-size:2.5rem;margin:0;">Active Conservation NGOs</h2>
+      </div>
+      <a href="/donate-nologin" class="btn" style="background:#003e3f;color:white;border-radius:12px;padding:10px 24px;">View All NGOs <i class="bi bi-arrow-right ms-2"></i></a>
+    </div>
+    <div class="row g-4">
+      {% set ngos_to_show = featured_ngos[:3] if featured_ngos else [] %}
+      {% if ngos_to_show %}
+        {% for ngo in ngos_to_show %}
+        <div class="col-md-6 col-lg-4">
+          <div class="ngo-card">
+            <div class="ngo-card-header">
+              <div class="ngo-avatar">{{ ngo.name[0] | upper }}</div>
+              <div>
+                <h6 style="color:white;font-weight:700;margin:0;font-size:0.9rem;">{{ ngo.name }}</h6>
+                <p style="color:rgba(255,255,255,0.6);margin:0;font-size:0.78rem;"><i class="bi bi-geo-alt me-1"></i>{{ ngo.region | default(ngo.state) | default('India') }}</p>
+              </div>
+            </div>
+            <div class="p-3">
+              <div class="d-flex gap-2 mb-3">
+                <div class="text-center p-2 rounded-2 flex-fill" style="background:#f0fafa;">
+                  <div style="font-size:1.1rem;font-weight:800;color:#003e3f;">{{ ngo.mangrove_area_km2 | default('—') }}</div>
+                  <div style="font-size:0.7rem;color:#666;">km² Mangroves</div>
+                </div>
+                <div class="text-center p-2 rounded-2 flex-fill" style="background:#f0fafa;">
+                  <div style="font-size:1.1rem;font-weight:800;color:#003e3f;">{{ ngo.trees_planted | default('—') }}</div>
+                  <div style="font-size:0.7rem;color:#666;">Trees Planted</div>
+                </div>
+              </div>
+              <a href="/ngo-details/{{ ngo.id | default('') }}" class="btn btn-sm w-100" style="background:#003e3f;color:white;border-radius:8px;">View Profile <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        {% for name, region, area, trees in [
+          ('Sundarbans Eco Foundation', 'West Bengal', 142, '28,000'),
+          ('Tamil Nadu Coastal Trust', 'Tamil Nadu', 88, '15,400'),
+          ('Gujarat Mangrove Society', 'Gujarat', 210, '41,000')
+        ] %}
+        <div class="col-md-6 col-lg-4">
+          <div class="ngo-card">
+            <div class="ngo-card-header">
+              <div class="ngo-avatar">{{ name[0] }}</div>
+              <div>
+                <h6 style="color:white;font-weight:700;margin:0;font-size:0.9rem;">{{ name }}</h6>
+                <p style="color:rgba(255,255,255,0.6);margin:0;font-size:0.78rem;"><i class="bi bi-geo-alt me-1"></i>{{ region }}</p>
+              </div>
+            </div>
+            <div class="p-3">
+              <div class="d-flex gap-2 mb-3">
+                <div class="text-center p-2 rounded-2 flex-fill" style="background:#f0fafa;">
+                  <div style="font-size:1.1rem;font-weight:800;color:#003e3f;">{{ area }}</div>
+                  <div style="font-size:0.7rem;color:#666;">km² Mangroves</div>
+                </div>
+                <div class="text-center p-2 rounded-2 flex-fill" style="background:#f0fafa;">
+                  <div style="font-size:1.1rem;font-weight:800;color:#003e3f;">{{ trees }}</div>
+                  <div style="font-size:0.7rem;color:#666;">Trees Planted</div>
+                </div>
+              </div>
+              <a href="/donate-nologin" class="btn btn-sm w-100" style="background:#003e3f;color:white;border-radius:8px;">View Profile <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- DUAL CTA -->
+<section style="padding:6rem 0;">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="cta-card cta-card-ngo">
+          <div style="font-size:3rem;margin-bottom:1rem;">🌿</div>
+          <h3 style="font-weight:800;margin-bottom:0.75rem;">For Restoration NGOs</h3>
+          <p style="color:rgba(255,255,255,0.8);margin-bottom:2rem;line-height:1.7;">Get free satellite monitoring for your mangrove zone. Generate NDVI health reports, air quality overlays, and carbon estimates. Connect with corporate donors actively seeking verified conservation partners.</p>
+          <ul style="list-style:none;padding:0;margin-bottom:2rem;color:rgba(255,255,255,0.9);">
+            {% for item in ['Free satellite monitoring dashboard', 'Automated health alerts by email', 'Verified impact data for grant applications', 'Access to corporate CSR funding'] %}
+            <li class="mb-2"><i class="bi bi-check-circle-fill me-2" style="color:#00b4b6;"></i>{{ item }}</li>
+            {% endfor %}
+          </ul>
+          <a href="/ngo-signup" class="btn btn-lg" style="background:white;color:#003e3f;font-weight:700;border-radius:12px;padding:14px 32px;">Register Your NGO <i class="bi bi-arrow-right ms-2"></i></a>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="cta-card cta-card-corp">
+          <div style="font-size:3rem;margin-bottom:1rem;">🏢</div>
+          <h3 style="font-weight:800;margin-bottom:0.75rem;">For Corporations</h3>
+          <p style="color:rgba(255,255,255,0.8);margin-bottom:2rem;line-height:1.7;">Meet your CSR obligations with satellite-verified mangrove restoration. Choose from verified NGOs, track your impact in real time, and generate MCA CSR-2 compliant reports for regulatory submissions.</p>
+          <ul style="list-style:none;padding:0;margin-bottom:2rem;color:rgba(255,255,255,0.9);">
+            {% for item in ['MCA CSR-2 compliant impact reports', 'Satellite-verified tree survival rates', 'Carbon offset calculations per rupee', 'ESG reporting data and metrics'] %}
+            <li class="mb-2"><i class="bi bi-check-circle-fill me-2" style="color:white;"></i>{{ item }}</li>
+            {% endfor %}
+          </ul>
+          <a href="/corporate-signup" class="btn btn-lg" style="background:white;color:#ea580c;font-weight:700;border-radius:12px;padding:14px 32px;">Start Funding <i class="bi bi-arrow-right ms-2"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CRISIS BAND -->
+<section style="background:#003e3f;padding:4rem 0;">
+  <div class="container text-center">
+    <h3 style="color:white;font-weight:700;margin-bottom:1rem;">India has lost 40% of its mangroves since 1980.</h3>
+    <p style="color:rgba(255,255,255,0.7);max-width:600px;margin:0 auto 2rem;">Mangroves store 3–5× more carbon than tropical rainforests. They protect 600 million coastal residents from storms. Every hectare lost releases 1,000+ tonnes of CO₂.</p>
+    <a href="/learnmore" class="btn btn-outline-light btn-lg px-5" style="border-radius:12px;">Learn Why Mangroves Matter <i class="bi bi-arrow-right ms-2"></i></a>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const counters = document.querySelectorAll('[data-counter]');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const target = parseInt(el.dataset.counter);
+                animateCounter(el, target);
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.3 });
+    counters.forEach(c => observer.observe(c));
+    function animateCounter(el, end) {
+        const start = performance.now();
+        const duration = 2000;
+        function update(now) {
+            const t = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - t, 3);
+            el.textContent = Math.round(end * eased).toLocaleString('en-IN');
+            if (t < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    }
+});
+</script>
+{% endblock %}
