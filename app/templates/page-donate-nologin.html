@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.donate-hero { background:linear-gradient(135deg,#003e3f,#006466); padding:7rem 0 4rem; color:white; }
+.ngo-grid-card { border:1px solid #e2f0f0; border-radius:16px; overflow:hidden; background:white; height:100%; transition:all 0.3s; cursor:pointer; }
+.ngo-grid-card:hover { border-color:#00b4b6; box-shadow:0 12px 40px rgba(0,62,63,0.15); transform:translateY(-4px); }
+.ngo-grid-hdr { background:linear-gradient(135deg,#003e3f,#006466); padding:1.25rem; }
+.ngo-avatar { width:48px; height:48px; background:rgba(0,180,182,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#00e5e7; font-weight:700; flex-shrink:0; }
+.amount-btn { border:2px solid #e2f0f0; border-radius:10px; padding:10px; cursor:pointer; text-align:center; font-weight:700; color:#003e3f; transition:all 0.2s; }
+.amount-btn.selected, .amount-btn:hover { border-color:#003e3f; background:#003e3f; color:white; }
+.filter-pill { border:2px solid #e2f0f0; border-radius:20px; padding:6px 16px; cursor:pointer; font-size:0.85rem; font-weight:600; color:#666; transition:all 0.2s; background:white; }
+.filter-pill.active { border-color:#003e3f; background:#003e3f; color:white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="donate-hero">
+  <div class="container">
+    <div class="text-center">
+      <div style="background:rgba(0,180,182,0.2);border:1px solid rgba(0,180,182,0.4);color:#00b4b6;padding:6px 16px;border-radius:20px;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;display:inline-block;margin-bottom:1rem;">Donate to Conservation</div>
+      <h1 style="font-weight:800;font-size:clamp(2rem,5vw,3.5rem);margin-bottom:1rem;">Fund Mangrove Restoration</h1>
+      <p style="color:rgba(255,255,255,0.8);max-width:560px;margin:0 auto;font-size:1.05rem;line-height:1.7;">Browse verified NGOs across India's coastline. Sign in or create a corporate account to make satellite-tracked, CSR-compliant donations.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:5rem 0;background:#f8fffe;">
+  <div class="container">
+    <!-- Filter bar -->
+    <div style="background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 20px rgba(0,62,63,0.07);margin-bottom:2rem;">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-5">
+          <input type="text" id="searchInput" class="form-control" placeholder="Search NGOs by name or location..." style="border:2px solid #e2f0f0;border-radius:10px;padding:10px 14px;" oninput="filterNGOs()">
+        </div>
+        <div class="col-md-7">
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="filter-pill active" data-state="all" onclick="setState('all', this)">All States</button>
+            {% for s in ['West Bengal','Tamil Nadu','Gujarat','Odisha','Kerala','Maharashtra'] %}
+            <button class="filter-pill" data-state="{{ s | lower }}" onclick="setState('{{ s | lower }}', this)">{{ s }}</button>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NGO Grid -->
+    {% if ngos %}
+    <div class="row g-4" id="ngoGrid">
+      {% for ngo in ngos %}
+      <div class="col-md-6 col-lg-4 ngo-item" data-name="{{ ngo.name | lower }}" data-state="{{ ngo.state | lower | default('') }}">
+        <div class="ngo-grid-card" onclick="openDonateModal('{{ ngo.id | default('') }}', '{{ ngo.name | replace("'", "\\'") }}')">
+          <div class="ngo-grid-hdr">
+            <div class="d-flex align-items-center gap-3">
+              <div class="ngo-avatar">{{ ngo.name[0] | upper }}</div>
+              <div>
+                <h6 style="color:white;font-weight:700;margin:0;font-size:0.9rem;">{{ ngo.name }}</h6>
+                <p style="color:rgba(255,255,255,0.6);margin:0;font-size:0.78rem;"><i class="bi bi-geo-alt me-1"></i>{{ ngo.region | default(ngo.state) | default('India') }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-3">
+            <div class="row g-2 mb-3">
+              <div class="col-6"><div style="background:#f0fafa;border-radius:8px;padding:0.6rem;text-align:center;"><div style="font-weight:800;color:#003e3f;">{{ ngo.mangrove_area_km2 | default('—') }}</div><div style="font-size:0.65rem;color:#666;">km² Mangroves</div></div></div>
+              <div class="col-6"><div style="background:#f0fafa;border-radius:8px;padding:0.6rem;text-align:center;"><div style="font-weight:800;color:#003e3f;">{{ ngo.trees_planted | default('—') }}</div><div style="font-size:0.65rem;color:#666;">Trees Planted</div></div></div>
+            </div>
+            {% if ngo.mission %}<p class="text-muted small mb-3" style="line-height:1.5;">{{ ngo.mission[:90] }}{% if ngo.mission|length > 90 %}...{% endif %}</p>{% endif %}
+            <button class="btn btn-sm w-100" style="background:#003e3f;color:white;border-radius:8px;">Donate to This NGO <i class="bi bi-arrow-right ms-1"></i></button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div id="noResults" class="text-center py-5 d-none">
+      <div style="font-size:3rem;">🔍</div>
+      <h5 style="color:#003e3f;font-weight:700;">No NGOs match your search</h5>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <div style="font-size:4rem;margin-bottom:1rem;">🌿</div>
+      <h4 style="font-weight:700;color:#003e3f;">No NGOs registered yet</h4>
+      <p class="text-muted">Be the first to join the conservation network.</p>
+      <a href="/ngo-signup" class="btn btn-cta px-5">Register Your NGO</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Donate Modal -->
+<div class="modal fade" id="donateModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:20px;border:none;">
+      <div style="background:linear-gradient(135deg,#003e3f,#006466);padding:1.5rem 2rem;border-radius:20px 20px 0 0;">
+        <h5 style="color:white;font-weight:800;margin:0;">Donate to <span id="modalNgoName">NGO</span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="position:absolute;top:1.25rem;right:1.25rem;"></button>
+      </div>
+      <div class="modal-body p-4">
+        {% if session.user_type == 'corporate' %}
+        <form action="/corporate/process-donation" method="POST">
+          <input type="hidden" name="ngo_id" id="modalNgoId">
+          <input type="hidden" name="ngo_name" id="modalNgoNameInput">
+          <p class="text-muted small mb-3">Select or enter a donation amount. Your impact will be satellite-tracked.</p>
+          <div class="row g-2 mb-3">
+            {% for amt in [1000, 5000, 10000, 25000, 50000] %}
+            <div class="col-4"><div class="amount-btn" onclick="setAmount({{ amt }}, this)">₹{{ '{:,}'.format(amt) }}</div></div>
+            {% endfor %}
+            <div class="col-4"><div class="amount-btn" onclick="focusCustom()">Custom</div></div>
+          </div>
+          <input type="number" name="amount" id="amountInput" class="form-control mb-3" placeholder="Or enter custom amount (₹)" min="100" style="border:2px solid #e2f0f0;border-radius:10px;">
+          <button type="submit" class="btn w-100 py-3" style="background:#003e3f;color:white;border-radius:12px;font-weight:700;">Confirm Donation <i class="bi bi-arrow-right ms-2"></i></button>
+        </form>
+        {% else %}
+        <div class="text-center py-3">
+          <div style="font-size:3rem;margin-bottom:1rem;">🌿</div>
+          <h5 style="font-weight:700;color:#003e3f;">Sign in to Donate</h5>
+          <p class="text-muted">Create a corporate account to make CSR-compliant, satellite-verified donations to this NGO.</p>
+          <a href="/login" class="btn w-100 py-3 mb-2" style="background:#003e3f;color:white;border-radius:12px;font-weight:700;">Sign In</a>
+          <a href="/corporate-signup" class="btn w-100 py-2" style="border:2px solid #003e3f;color:#003e3f;border-radius:12px;font-weight:600;">Create Corporate Account</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let activeState = 'all';
+function filterNGOs() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const items = document.querySelectorAll('.ngo-item');
+  let vis = 0;
+  items.forEach(el => {
+    const nameMatch = !q || el.dataset.name.includes(q);
+    const stateMatch = activeState === 'all' || (el.dataset.state || '').includes(activeState);
+    const show = nameMatch && stateMatch;
+    el.classList.toggle('d-none', !show);
+    if (show) vis++;
+  });
+  document.getElementById('noResults')?.classList.toggle('d-none', vis > 0);
+}
+function setState(state, btn) {
+  activeState = state;
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterNGOs();
+}
+function openDonateModal(id, name) {
+  const el = document.getElementById('modalNgoId');
+  const nel = document.getElementById('modalNgoNameInput');
+  const label = document.getElementById('modalNgoName');
+  if (el) el.value = id;
+  if (nel) nel.value = name;
+  if (label) label.textContent = name;
+  new bootstrap.Modal(document.getElementById('donateModal')).show();
+}
+function setAmount(amt, el) {
+  document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('amountInput').value = amt;
+}
+function focusCustom() {
+  document.getElementById('amountInput').focus();
+  document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+}
+</script>
+{% endblock %}

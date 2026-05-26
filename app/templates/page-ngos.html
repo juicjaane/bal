@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.ngos-hero { background:linear-gradient(135deg,#003e3f,#006466); padding:8rem 0 5rem; color:white; }
+.ngo-pub-card { border:1px solid #e2f0f0; border-radius:16px; overflow:hidden; background:white; height:100%; transition:all 0.3s; }
+.ngo-pub-card:hover { border-color:#00b4b6; box-shadow:0 12px 40px rgba(0,62,63,0.12); transform:translateY(-4px); }
+.ngo-pub-hdr { background:linear-gradient(135deg,#003e3f,#006466); padding:1.5rem; }
+.ngo-pub-avatar { width:52px; height:52px; background:rgba(0,180,182,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#00e5e7; font-weight:700; flex-shrink:0; }
+.health-badge { padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+.health-IMPROVING { background:rgba(74,222,128,0.15); color:#16a34a; }
+.health-STABLE { background:rgba(251,191,36,0.15); color:#d97706; }
+.health-DECLINING { background:rgba(248,113,113,0.15); color:#dc2626; }
+.filter-bar { background:white; border-radius:16px; padding:1.5rem; box-shadow:0 2px 20px rgba(0,62,63,0.08); margin-bottom:2rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="ngos-hero">
+  <div class="container text-center">
+    <div style="background:rgba(0,180,182,0.2);border:1px solid rgba(0,180,182,0.4);color:#00b4b6;padding:6px 16px;border-radius:20px;font-size:0.8rem;letter-spacing:1px;text-transform:uppercase;display:inline-block;margin-bottom:1rem;">Conservation Network</div>
+    <h1 style="font-weight:800;font-size:clamp(2rem,5vw,3.5rem);margin-bottom:1rem;">Verified Mangrove NGOs</h1>
+    <p style="color:rgba(255,255,255,0.8);max-width:560px;margin:0 auto 2rem;font-size:1.05rem;line-height:1.7;">Every NGO on Blue.AI has a registered geographic zone monitored by satellite. Browse active conservation partners across India's coastline.</p>
+    <a href="/ngo-signup" class="btn btn-cta btn-lg px-5 py-3">Register Your NGO <i class="bi bi-arrow-right ms-2"></i></a>
+  </div>
+</section>
+
+<section style="padding:5rem 0;background:#f8fffe;">
+  <div class="container">
+    <div class="filter-bar">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-5">
+          <label class="form-label fw-semibold small text-muted">Search</label>
+          <input type="text" id="searchInput" class="form-control" placeholder="Search by name or region..." style="border:2px solid #e2f0f0;border-radius:10px;padding:10px 14px;">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold small text-muted">State</label>
+          <select id="stateFilter" class="form-select" style="border:2px solid #e2f0f0;border-radius:10px;padding:10px 14px;">
+            <option value="">All States</option>
+            {% for s in ['West Bengal','Tamil Nadu','Gujarat','Odisha','Andhra Pradesh','Kerala','Karnataka','Goa','Maharashtra'] %}
+            <option>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold small text-muted">Health Status</label>
+          <select id="healthFilter" class="form-select" style="border:2px solid #e2f0f0;border-radius:10px;padding:10px 14px;">
+            <option value="">All Status</option>
+            <option value="IMPROVING">Improving</option>
+            <option value="STABLE">Stable</option>
+            <option value="DECLINING">Declining</option>
+          </select>
+        </div>
+        <div class="col-md-1">
+          <button class="btn w-100 py-2" style="background:#003e3f;color:white;border-radius:10px;" onclick="filterNGOs()"><i class="bi bi-search"></i></button>
+        </div>
+      </div>
+    </div>
+
+    {% if ngos %}
+    <div class="row g-4" id="ngoGrid">
+      {% for ngo in ngos %}
+      <div class="col-md-6 col-lg-4 ngo-item" data-name="{{ ngo.name | lower }}" data-state="{{ ngo.state | default('') }}" data-health="{{ ngo.health_status | default('STABLE') }}">
+        <div class="ngo-pub-card">
+          <div class="ngo-pub-hdr">
+            <div class="d-flex align-items-center gap-3">
+              <div class="ngo-pub-avatar">{{ ngo.name[0] | upper }}</div>
+              <div>
+                <h6 style="color:white;font-weight:700;margin:0;font-size:0.9rem;">{{ ngo.name }}</h6>
+                <p style="color:rgba(255,255,255,0.6);margin:0;font-size:0.78rem;"><i class="bi bi-geo-alt me-1"></i>{{ ngo.region | default(ngo.state) | default('India') }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-3">
+            <div class="d-flex gap-1 mb-3 flex-wrap">
+              <span class="health-badge health-{{ ngo.health_status | default('STABLE') }}">{{ ngo.health_status | default('Stable') }}</span>
+              {% if ngo.years_active %}<span style="background:#f0fafa;color:#006466;padding:4px 10px;border-radius:20px;font-size:0.72rem;">{{ ngo.years_active }} yrs active</span>{% endif %}
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6"><div style="background:#f0fafa;border-radius:8px;padding:0.6rem;text-align:center;"><div style="font-size:1rem;font-weight:800;color:#003e3f;">{{ ngo.mangrove_area_km2 | default('—') }}</div><div style="font-size:0.65rem;color:#666;">km²</div></div></div>
+              <div class="col-6"><div style="background:#f0fafa;border-radius:8px;padding:0.6rem;text-align:center;"><div style="font-size:1rem;font-weight:800;color:#003e3f;">{{ ngo.trees_planted | default('—') }}</div><div style="font-size:0.65rem;color:#666;">Trees</div></div></div>
+            </div>
+            {% if ngo.mission %}<p class="text-muted small mb-3" style="line-height:1.5;">{{ ngo.mission[:100] }}{% if ngo.mission|length > 100 %}...{% endif %}</p>{% endif %}
+            <a href="/ngo-details/{{ ngo.id | default('') }}" class="btn btn-sm w-100" style="background:#003e3f;color:white;border-radius:8px;">View Profile <i class="bi bi-arrow-right ms-1"></i></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div id="noResults" class="text-center py-5 d-none">
+      <div style="font-size:3rem;">&#x1F50D;</div>
+      <h5 style="color:#003e3f;font-weight:700;">No NGOs match your filters</h5>
+      <p class="text-muted">Try adjusting the state or health status filters.</p>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <div style="font-size:4rem;margin-bottom:1rem;">🌿</div>
+      <h4 style="font-weight:700;color:#003e3f;">No NGOs registered yet</h4>
+      <p class="text-muted">Be the first to join the Blue.AI conservation network.</p>
+      <a href="/ngo-signup" class="btn btn-cta px-5">Register Your NGO</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section style="background:#003e3f;padding:5rem 0;text-align:center;">
+  <div class="container">
+    <h3 style="color:white;font-weight:800;margin-bottom:1rem;">Are You a Mangrove Restoration NGO?</h3>
+    <p style="color:rgba(255,255,255,0.75);max-width:500px;margin:0 auto 2rem;">Join Blue.AI for free. Get satellite monitoring, automated health alerts, and access to corporate CSR funding.</p>
+    <a href="/ngo-signup" class="btn btn-cta btn-lg px-5 py-3">Register for Free <i class="bi bi-arrow-right ms-2"></i></a>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function filterNGOs() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const state = document.getElementById('stateFilter').value.toLowerCase();
+  const health = document.getElementById('healthFilter').value;
+  const items = document.querySelectorAll('.ngo-item');
+  let visible = 0;
+  items.forEach(el => {
+    const name = el.dataset.name || '';
+    const elState = el.dataset.state.toLowerCase();
+    const elHealth = el.dataset.health;
+    const show = (!search || name.includes(search)) && (!state || elState.includes(state)) && (!health || elHealth === health);
+    el.classList.toggle('d-none', !show);
+    if (show) visible++;
+  });
+  document.getElementById('noResults')?.classList.toggle('d-none', visible > 0);
+}
+document.getElementById('searchInput')?.addEventListener('input', filterNGOs);
+document.getElementById('stateFilter')?.addEventListener('change', filterNGOs);
+document.getElementById('healthFilter')?.addEventListener('change', filterNGOs);
+</script>
+{% endblock %}

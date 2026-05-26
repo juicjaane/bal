@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Mangrove Map — Blue.AI</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+body,html { margin:0; padding:0; height:100%; background:#003e3f; }
+#map { width:100%; height:100vh; }
+.map-legend {
+  position:absolute; bottom:30px; left:20px; z-index:1000;
+  background:white; border-radius:12px; padding:1rem 1.25rem;
+  box-shadow:0 4px 20px rgba(0,0,0,0.2); min-width:180px;
+}
+.legend-title { font-weight:700; color:#003e3f; font-size:0.85rem; margin-bottom:0.75rem; }
+.legend-item { display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:0.78rem; color:#444; }
+.legend-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+.info-panel {
+  position:absolute; top:20px; right:20px; z-index:1000;
+  background:white; border-radius:12px; padding:1rem 1.25rem;
+  box-shadow:0 4px 20px rgba(0,0,0,0.2); max-width:220px;
+}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="map-legend">
+  <div class="legend-title">🗺️ India Mangrove Zones</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4ade80;"></div> Healthy / Improving</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;"></div> Stable / Monitoring</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f87171;"></div> Declining / At Risk</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#00b4b6;opacity:0.5;"></div> Monitoring Zone</div>
+</div>
+<div class="info-panel">
+  <div style="font-weight:700;color:#003e3f;font-size:0.85rem;margin-bottom:0.5rem;">Blue.AI Monitor</div>
+  <p style="font-size:0.75rem;color:#666;margin:0;">Click any marker to see zone details. Zones are monitored via Google Earth Engine Sentinel-2 imagery.</p>
+</div>
+<script>
+const map = L.map('map', { zoomControl: true }).setView([20.5937, 78.9629], 5);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains: 'abcd', maxZoom: 19
+}).addTo(map);
+
+const zones = [
+  { name: 'Sundarbans Delta', lat: 21.9497, lon: 88.2067, state: 'West Bengal', area: 1850, status: 'IMPROVING', color: '#4ade80' },
+  { name: 'Bhitarkanika', lat: 20.7271, lon: 86.8946, state: 'Odisha', area: 672, status: 'STABLE', color: '#fbbf24' },
+  { name: 'Krishna-Godavari Delta', lat: 16.1, lon: 81.5, state: 'Andhra Pradesh', area: 384, status: 'DECLINING', color: '#f87171' },
+  { name: 'Pichavaram', lat: 11.4317, lon: 79.7785, state: 'Tamil Nadu', area: 45, status: 'IMPROVING', color: '#4ade80' },
+  { name: 'Gulf of Kutch', lat: 22.5, lon: 70.1, state: 'Gujarat', area: 1175, status: 'STABLE', color: '#fbbf24' },
+  { name: 'Andaman Islands', lat: 11.7401, lon: 92.6586, state: 'Andaman & Nicobar', area: 617, status: 'IMPROVING', color: '#4ade80' },
+  { name: 'Achra-Ratnagiri', lat: 16.5, lon: 73.3, state: 'Maharashtra', area: 218, status: 'STABLE', color: '#fbbf24' },
+  { name: 'Vembanad Lake', lat: 9.6, lon: 76.4, state: 'Kerala', area: 29, status: 'DECLINING', color: '#f87171' }
+];
+
+zones.forEach(z => {
+  const marker = L.circleMarker([z.lat, z.lon], {
+    radius: Math.sqrt(z.area) / 3 + 8,
+    color: z.color, fillColor: z.color,
+    fillOpacity: 0.5, weight: 2
+  }).addTo(map);
+  marker.bindPopup(`
+    <div style="font-family:Inter,sans-serif;min-width:160px;">
+      <strong style="color:#003e3f;font-size:0.95rem;">${z.name}</strong><br>
+      <span style="color:#666;font-size:0.78rem;">${z.state}</span><br>
+      <div style="margin-top:8px;display:flex;justify-content:space-between;">
+        <span style="font-size:0.78rem;">Area:</span>
+        <strong style="font-size:0.78rem;">${z.area} km²</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="font-size:0.78rem;">Status:</span>
+        <strong style="font-size:0.78rem;color:${z.color};">${z.status}</strong>
+      </div>
+    </div>
+  `);
+});
+</script>
+</body>
+</html>

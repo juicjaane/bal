@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.hero-learn { background:linear-gradient(135deg,#003e3f,#006466); padding:8rem 0 5rem; color:white; }
+.stat-pill { background:rgba(0,180,182,0.2); border:1px solid rgba(0,180,182,0.4); color:#00b4b6; padding:4px 14px; border-radius:20px; font-size:0.8rem; font-weight:600; display:inline-block; margin-bottom:1rem; }
+.fact-card { border:1px solid #e2f0f0; border-radius:16px; padding:2rem; background:white; height:100%; transition:all 0.3s; }
+.fact-card:hover { border-color:#00b4b6; box-shadow:0 8px 30px rgba(0,62,63,0.1); transform:translateY(-4px); }
+.crisis-bar { background:#003e3f; color:white; padding:5rem 0; }
+.timeline-item { display:flex; gap:1.5rem; margin-bottom:2rem; }
+.timeline-dot { width:40px; height:40px; background:linear-gradient(135deg,#003e3f,#006466); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:0.9rem; font-weight:700; flex-shrink:0; margin-top:4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero-learn">
+  <div class="container">
+    <div class="text-center">
+      <div class="stat-pill">Science & Impact</div>
+      <h1 style="font-weight:800;font-size:clamp(2rem,5vw,3.5rem);margin-bottom:1rem;">Why Mangroves Are<br>Earth's Most Valuable Forests</h1>
+      <p style="color:rgba(255,255,255,0.8);max-width:600px;margin:0 auto 2rem;font-size:1.1rem;line-height:1.7;">India's coastline shelters 4,975 km² of mangrove ecosystems. They are disappearing at a rate that threatens millions of lives and accelerates climate change.</p>
+      <a href="#facts" class="btn btn-outline-light px-5 py-3" style="border-radius:12px;">Explore the Science <i class="bi bi-arrow-down ms-2"></i></a>
+    </div>
+  </div>
+</section>
+
+<section id="facts" style="padding:6rem 0;background:#f8fffe;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 style="font-weight:800;color:#003e3f;font-size:2.5rem;">What Mangroves Do</h2>
+      <p class="text-muted" style="max-width:500px;margin:0 auto;">These intertidal forests provide services worth billions of rupees annually — most of which are invisible until they're gone.</p>
+    </div>
+    <div class="row g-4">
+      {% for icon, title, stat, desc in [
+        ('🌊', 'Coastal Protection', '30–75%', 'Mangroves reduce wave height by 30–75% during storms and cyclones, protecting coastal communities and infrastructure from devastating surge damage.'),
+        ('🌡️', 'Carbon Storage', '3–5× More', 'Mangrove soils store 3–5 times more carbon per hectare than tropical rainforests. Each hectare sequesters up to 1,000 tonnes of CO₂.'),
+        ('🐠', 'Biodiversity Hotspot', '3,000+ Species', 'Indian mangroves support over 3,000 species of fish, birds, reptiles, and mammals — including the Royal Bengal Tiger in the Sundarbans.'),
+        ('👨‍👩‍👧', 'Livelihoods', '4M+ Families', 'Over 4 million fishing and farming families in India depend on mangrove ecosystems for food security and income.'),
+        ('💧', 'Water Filtration', '90% Pollutants', 'Mangrove root systems filter up to 90% of agricultural runoff and heavy metal pollution before it reaches the ocean.'),
+        ('💰', 'Economic Value', '₹1.6 Lakh Cr/yr', 'India’s mangroves provide ecosystem services estimated at ₹1.6 lakh crore per year in coastal protection and fishery support alone.')
+      ] %}
+      <div class="col-md-6 col-lg-4">
+        <div class="fact-card">
+          <div style="font-size:2.5rem;margin-bottom:0.75rem;">{{ icon }}</div>
+          <div style="font-size:1.8rem;font-weight:900;color:#003e3f;margin-bottom:0.5rem;">{{ stat }}</div>
+          <h6 style="font-weight:700;color:#003e3f;">{{ title }}</h6>
+          <p class="text-muted small mb-0">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="crisis-bar">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <h2 style="font-weight:800;color:white;font-size:2.5rem;margin-bottom:1.5rem;">The Crisis Is Now</h2>
+        <div class="timeline-item">
+          <div class="timeline-dot">1</div>
+          <div><h6 style="color:white;font-weight:700;">40% Lost Since 1980</h6><p style="color:rgba(255,255,255,0.7);margin:0;">India has lost nearly 1,900 km² of mangroves over four decades due to aquaculture, urban expansion, and pollution.</p></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">2</div>
+          <div><h6 style="color:white;font-weight:700;">Rising Sea Levels Accelerating Loss</h6><p style="color:rgba(255,255,255,0.7);margin:0;">Sea level rise of 3.3mm per year is drowning root systems faster than mangroves can adapt, especially in the Sundarbans.</p></div>
+        </div>
+        <div class="timeline-item" style="margin-bottom:0;">
+          <div class="timeline-dot">3</div>
+          <div><h6 style="color:white;font-weight:700;">Monitoring Gap Slows Response</h6><p style="color:rgba(255,255,255,0.7);margin:0;">Most NGOs lack satellite data access. Without real-time monitoring, mangrove loss goes undetected for months — too late for intervention.</p></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:2rem;">
+          <h5 style="color:white;font-weight:700;margin-bottom:1.5rem;">India's Mangrove Status</h5>
+          {% for state, pct, color in [('West Bengal (Sundarbans)', 85, '#4ade80'), ('Gujarat (Gulf of Kutch)', 62, '#4ade80'), ('Andaman & Nicobar', 71, '#4ade80'), ('Maharashtra', 45, '#fbbf24'), ('Andhra Pradesh', 38, '#f87171'), ('Kerala', 22, '#f87171')] %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span style="color:rgba(255,255,255,0.8);font-size:0.85rem;">{{ state }}</span>
+              <span style="color:{{ color }};font-weight:600;font-size:0.85rem;">{{ pct }}% healthy</span>
+            </div>
+            <div class="progress" style="height:6px;background:rgba(255,255,255,0.1);">
+              <div class="progress-bar" style="width:{{ pct }}%;background:{{ color }};"></div>
+            </div>
+          </div>
+          {% endfor %}
+          <p style="color:rgba(255,255,255,0.4);font-size:0.72rem;margin:1rem 0 0;">Indicative data based on GMW V3 dataset analysis</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:6rem 0;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 style="font-weight:800;color:#003e3f;font-size:2.5rem;">How Blue.AI Helps</h2>
+      <p class="text-muted" style="max-width:500px;margin:0 auto;">We bridge the satellite data gap — giving NGOs the intelligence they need and giving corporations the verified proof they require.</p>
+    </div>
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-6">
+        {% for icon, title, desc in [
+          ('🛰️', 'Free Satellite Access for NGOs', 'Every registered NGO gets access to Global Mangrove Watch V3 data, Sentinel-2 NDVI imagery, and automated monthly reports — tools previously only available to research institutions.'),
+          ('🔔', 'Early Warning Alerts', 'Our algorithm detects NDVI decline trends 30–60 days before visible damage occurs, giving NGOs time to intervene before mangrove loss becomes irreversible.'),
+          ('📊', 'Verified Funding Pipeline', 'Corporate donations are tied to specific GPS coordinates. Progress is satellite-verified. This creates a transparent, fraud-resistant funding model for conservation.')
+        ] %}
+        <div class="d-flex gap-3 mb-4">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,rgba(0,62,63,0.1),rgba(0,180,182,0.1));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">{{ icon }}</div>
+          <div>
+            <h6 style="font-weight:700;color:#003e3f;">{{ title }}</h6>
+            <p class="text-muted small mb-0">{{ desc }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="col-lg-6">
+        <div style="background:linear-gradient(135deg,#003e3f,#006466);border-radius:20px;padding:2.5rem;color:white;">
+          <h5 style="font-weight:700;margin-bottom:1.5rem;">The Tech Stack</h5>
+          {% for tech, desc in [
+            ('Google Earth Engine', 'Planetary-scale geospatial processing for mangrove extent analysis'),
+            ('Sentinel-2 (ESA)', '10m resolution optical imagery for NDVI canopy health'),
+            ('Sentinel-5P (ESA)', 'Monthly NO₂ and SO₂ tropospheric column density'),
+            ('GMW V3 Dataset', 'Global Mangrove Watch baseline for change detection'),
+            ('Folium + Leaflet.js', 'Interactive maps embedded directly in NGO dashboards')
+          ] %}
+          <div class="d-flex gap-3 mb-3">
+            <i class="bi bi-check-circle-fill" style="color:#00b4b6;margin-top:3px;"></i>
+            <div>
+              <span style="font-weight:600;font-size:0.9rem;">{{ tech }}</span>
+              <p style="color:rgba(255,255,255,0.65);font-size:0.8rem;margin:0;">{{ desc }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#f8fffe;padding:5rem 0;">
+  <div class="container">
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-5">
+        <div style="background:linear-gradient(135deg,#003e3f,#006466);border-radius:20px;padding:2.5rem;color:white;text-align:center;">
+          <div style="font-size:3rem;margin-bottom:1rem;">🌿</div>
+          <h4 style="font-weight:800;">I Restore Mangroves</h4>
+          <p style="color:rgba(255,255,255,0.8);">Get free satellite monitoring, health alerts, and connect with corporate funders.</p>
+          <a href="/ngo-signup" class="btn btn-lg" style="background:white;color:#003e3f;font-weight:700;border-radius:12px;">Register Your NGO</a>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div style="background:linear-gradient(135deg,#f97316,#ea580c);border-radius:20px;padding:2.5rem;color:white;text-align:center;">
+          <div style="font-size:3rem;margin-bottom:1rem;">🏢</div>
+          <h4 style="font-weight:800;">I Fund Conservation</h4>
+          <p style="color:rgba(255,255,255,0.85);">Meet CSR obligations with satellite-verified impact reports ready for MCA filing.</p>
+          <a href="/corporate-signup" class="btn btn-lg" style="background:white;color:#ea580c;font-weight:700;border-radius:12px;">Get Started</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
