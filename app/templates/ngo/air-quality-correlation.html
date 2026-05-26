@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.aq-hero { background:linear-gradient(135deg,#1a3a4a,#0f5460,#00b4b6); padding:6rem 0 4rem; color:white; }
+.pollutant-card { border:1px solid #e2f0f0; border-radius:16px; padding:1.75rem; background:white; height:100%; }
+.aq-gauge { width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:800; flex-shrink:0; }
+.who-bar { height:8px; border-radius:4px; background:#e2f0f0; overflow:hidden; }
+.who-fill-ok { background:#4ade80; }
+.who-fill-warn { background:#fbbf24; }
+.who-fill-bad { background:#f87171; }
+.note-card { background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:1.25rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="aq-hero">
+  <div class="container">
+    <a href="/ngo/" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;"><i class="bi bi-arrow-left me-1"></i>Back to Dashboard</a>
+    <div class="mt-3">
+      <div style="background:rgba(0,180,182,0.2);border:1px solid rgba(0,180,182,0.4);color:#00b4b6;padding:5px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;display:inline-block;margin-bottom:0.75rem;">Air Quality Analysis</div>
+      <h1 style="font-weight:800;font-size:2.5rem;margin-bottom:0.5rem;">Mangrove &amp; Air Quality Correlation</h1>
+      <p style="color:rgba(255,255,255,0.75);">{{ area }} — Sentinel-5P NO₂ / SO₂ Analysis</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:4rem 0;background:#f8fffe;">
+  <div class="container">
+    
+    <!-- GEE Chart (if available) -->
+    {% if aq_chart %}
+    <div style="background:white;border:1px solid #e2f0f0;border-radius:16px;padding:2rem;margin-bottom:2rem;">
+      <h5 style="font-weight:700;color:#003e3f;margin-bottom:1.5rem;">
+        <i class="bi bi-graph-up me-2"></i>Sentinel-5P Monthly Data — {{ area }}
+      </h5>
+      <img src="data:image/png;base64,{{ aq_chart }}" class="img-fluid" style="border-radius:8px;" alt="Air Quality Chart">
+      <p class="text-muted small mt-2 mb-0">Source: Copernicus Sentinel-5P via Google Earth Engine. Monthly tropospheric column density for NO₂ and SO₂.</p>
+    </div>
+    {% elif aq_error %}
+    <div class="alert" style="background:#fff3cd;border:1px solid #ffc107;border-radius:12px;padding:1.25rem;margin-bottom:2rem;">
+      <i class="bi bi-exclamation-triangle me-2" style="color:#856404;"></i>
+      <strong style="color:#856404;">Satellite data unavailable:</strong>
+      <span class="text-muted"> {{ aq_error }}</span>
+      <p class="mb-0 mt-1 small text-muted">Showing NDVI-based estimate below instead.</p>
+    </div>
+    {% endif %}
+
+    <!-- NDVI-based AQ Estimate -->
+    {% if ndvi_estimate %}
+    <h5 style="font-weight:700;color:#003e3f;margin-bottom:1.5rem;">NDVI-Based Air Quality Estimate</h5>
+    <div class="row g-4 mb-4">
+      <!-- NO2 -->
+      <div class="col-md-6">
+        <div class="pollutant-card">
+          <div class="d-flex align-items-center gap-3 mb-1.5">
+            <div class="aq-gauge" style="background:{{ '#dcfce7' if ndvi_estimate.no2_ok else '#fee2e2' }};color:{{ '#16a34a' if ndvi_estimate.no2_ok else '#dc2626' }};">
+              NO₂
+            </div>
+            <div>
+              <div style="font-size:2rem;font-weight:900;color:#003e3f;line-height:1;">{{ ndvi_estimate.no2_ug_m3 }} <span style="font-size:0.9rem;font-weight:400;color:#666;">µg/m³</span></div>
+              <div style="font-size:0.8rem;font-weight:600;color:{{ '#16a34a' if ndvi_estimate.no2_ok else '#dc2626' }};">{{ 'Within WHO limit' if ndvi_estimate.no2_ok else 'Above WHO limit' }}</div>
+            </div>
+          </div>
+          <div class="who-bar mt-3">
+            <div class="{{ 'who-fill-ok' if ndvi_estimate.no2_ok else 'who-fill-bad' }}" style="width:{{ [ndvi_estimate.no2_x_who * 50, 100] | min | int }}%;"></div>
+          </div>
+          <div class="d-flex justify-content-between mt-1">
+            <span class="text-muted" style="font-size:0.72rem;">0</span>
+            <span class="text-muted" style="font-size:0.72rem;">WHO annual limit: 10 µg/m³</span>
+          </div>
+          <p class="text-muted small mb-0 mt-2">{{ ndvi_estimate.no2_x_who }}× WHO annual guideline (10 µg/m³). Nitrogen dioxide from vehicle emissions and industry.</p>
+        </div>
+      </div>
+      <!-- SO2 -->
+      <div class="col-md-6">
+        <div class="pollutant-card">
+          <div class="d-flex align-items-center gap-3 mb-1.5">
+            <div class="aq-gauge" style="background:{{ '#dcfce7' if ndvi_estimate.so2_ok else '#fee2e2' }};color:{{ '#16a34a' if ndvi_estimate.so2_ok else '#dc2626' }};">
+              SO₂
+            </div>
+            <div>
+              <div style="font-size:2rem;font-weight:900;color:#003e3f;line-height:1;">{{ ndvi_estimate.so2_ug_m3 }} <span style="font-size:0.9rem;font-weight:400;color:#666;">µg/m³</span></div>
+              <div style="font-size:0.8rem;font-weight:600;color:{{ '#16a34a' if ndvi_estimate.so2_ok else '#dc2626' }};">{{ 'Within WHO limit' if ndvi_estimate.so2_ok else 'Above WHO limit' }}</div>
+            </div>
+          </div>
+          <div class="who-bar mt-3">
+            <div class="{{ 'who-fill-ok' if ndvi_estimate.so2_ok else 'who-fill-bad' }}" style="width:{{ [ndvi_estimate.so2_x_who * 50, 100] | min | int }}%;"></div>
+          </div>
+          <div class="d-flex justify-content-between mt-1">
+            <span class="text-muted" style="font-size:0.72rem;">0</span>
+            <span class="text-muted" style="font-size:0.72rem;">WHO daily limit: 40 µg/m³</span>
+          </div>
+          <p class="text-muted small mb-0 mt-2">{{ ndvi_estimate.so2_x_who }}× WHO daily guideline (40 µg/m³). Sulphur dioxide from combustion and industrial processes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div style="background:white;border:1px solid #e2f0f0;border-radius:16px;padding:2rem;margin-bottom:2rem;">
+      <h6 style="font-weight:700;color:#003e3f;">Interpretation</h6>
+      <p class="text-muted mb-3">{{ ndvi_estimate.description }}</p>
+      <div class="row g-3">
+        {% for icon, title, desc in [
+          ('🌿', 'Mangrove Air Filtration', 'Mangrove canopies act as biofilters — leaves absorb NO₂ and SO₂ through stomatal uptake, reducing ambient concentrations in surrounding coastal areas.'),
+          ('💧', 'Aerosol Deposition', 'Dense mangrove structure traps particulate matter through dry deposition on leaf surfaces, reducing PM2.5 and PM10 in coastal areas.'),
+          ('🔬', 'Monitoring Frequency', 'Sentinel-5P provides monthly tropospheric column data at 3.5 × 5.5 km resolution. Enable GEE credentials to see historical trends for your zone.')
+        ] %}
+        <div class="col-md-4">
+          <div style="background:#f0fafa;border-radius:10px;padding:1.25rem;">
+            <div style="font-size:1.5rem;margin-bottom:0.5rem;">{{ icon }}</div>
+            <h6 style="font-weight:700;color:#003e3f;font-size:0.85rem;">{{ title }}</h6>
+            <p class="text-muted small mb-0">{{ desc }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="note-card">
+      <p class="small mb-0" style="color:#856404;">
+        <i class="bi bi-info-circle me-1"></i>
+        <strong>Indicative Data.</strong> The estimates above are derived from NDVI-to-AQ correlation models and are suitable for awareness and reporting context only. For regulatory submissions, use official CPCB monitoring station data or commission a formal air quality assessment from an accredited laboratory.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

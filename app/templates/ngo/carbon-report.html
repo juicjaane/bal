@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.carbon-hero { background:linear-gradient(135deg,#003e3f,#006466); padding:6rem 0 4rem; color:white; }
+.metric-card { border:1px solid #e2f0f0; border-radius:16px; padding:2rem; background:white; text-align:center; height:100%; }
+.metric-num { font-size:2.5rem; font-weight:900; color:#003e3f; line-height:1; }
+.metric-unit { font-size:0.85rem; color:#00b4b6; font-weight:600; }
+.stock-bar { height:12px; border-radius:6px; margin-bottom:6px; }
+.methodology-card { background:#f0fafa; border:1px solid #c3e8e8; border-radius:16px; padding:1.5rem; }
+.tip-card { background:linear-gradient(135deg,rgba(0,62,63,0.05),rgba(0,180,182,0.08)); border:1px solid #c3e8e8; border-radius:16px; padding:1.5rem; }
+@media print { .no-print { display:none !important; } body { background:white; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="carbon-hero no-print">
+  <div class="container">
+    <a href="/ngo/" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;"><i class="bi bi-arrow-left me-1"></i>Back to Dashboard</a>
+    <div class="mt-3">
+      <div style="background:rgba(0,180,182,0.2);border:1px solid rgba(0,180,182,0.4);color:#00b4b6;padding:5px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;display:inline-block;margin-bottom:0.75rem;">Carbon Sequestration Report</div>
+      <h1 style="font-weight:800;font-size:2.5rem;margin-bottom:0.5rem;">Blue Carbon Estimate</h1>
+      <p style="color:rgba(255,255,255,0.75);margin:0;">{{ user.name | default('Your NGO') }} — {{ user.region | default(user.state) | default('India') }}</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:4rem 0;background:#f8fffe;">
+  <div class="container">
+    {% if carbon and not carbon.get('is_placeholder') %}
+    
+    <!-- Key Metrics -->
+    <div class="row g-4 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="metric-card">
+          <div class="metric-num" data-counter="{{ carbon.annual_seq_tco2 | int }}">0</div>
+          <div class="metric-unit">tCO₂e / year</div>
+          <p class="text-muted small mb-0 mt-2">Annual Sequestration</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card">
+          <div class="metric-num" data-counter="{{ carbon.total_stock_tco2 | int }}">0</div>
+          <div class="metric-unit">tCO₂e stored</div>
+          <p class="text-muted small mb-0 mt-2">Total Carbon Stock</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card">
+          <div class="metric-num" data-counter="{{ carbon.area_ha | int }}">0</div>
+          <div class="metric-unit">hectares</div>
+          <p class="text-muted small mb-0 mt-2">Mangrove Area</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card">
+          <div class="metric-num" data-counter="{{ carbon.seq_rate_tco2_ha_yr | int }}">0</div>
+          <div class="metric-unit">tCO₂e/ha/yr</div>
+          <p class="text-muted small mb-0 mt-2">Sequestration Rate</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <!-- Carbon Stock Breakdown -->
+      <div class="col-lg-6">
+        <div style="background:white;border:1px solid #e2f0f0;border-radius:16px;padding:2rem;height:100%;">
+          <h5 style="font-weight:700;color:#003e3f;margin-bottom:1.5rem;">Carbon Stock Breakdown</h5>
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted small">Above-ground Biomass</span>
+              <span style="font-weight:700;color:#003e3f;">{{ carbon.above_stock_tc | int }} tC</span>
+            </div>
+            <div class="stock-bar" style="background:#003e3f;width:{{ [carbon.above_stock_tc / carbon.total_stock_tc * 100, 100] | min | int }}%;"></div>
+          </div>
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted small">Soil Organic Carbon</span>
+              <span style="font-weight:700;color:#00b4b6;">{{ carbon.soil_stock_tc | int }} tC</span>
+            </div>
+            <div class="stock-bar" style="background:#00b4b6;width:{{ [carbon.soil_stock_tc / carbon.total_stock_tc * 100, 100] | min | int }}%;"></div>
+          </div>
+          <div class="mb-0">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted small">Below-ground Biomass</span>
+              <span style="font-weight:700;color:#006466;">{{ (carbon.total_stock_tc - carbon.above_stock_tc - carbon.soil_stock_tc) | int }} tC</span>
+            </div>
+            <div class="stock-bar" style="background:#006466;width:{{ [((carbon.total_stock_tc - carbon.above_stock_tc - carbon.soil_stock_tc) / carbon.total_stock_tc * 100), 100] | min | int }}%;"></div>
+          </div>
+          <p class="text-muted small mt-3 mb-0">Total: <strong>{{ carbon.total_stock_tc | int }} tC</strong> (≈ {{ carbon.total_stock_tco2 | int }} tCO₂e)</p>
+        </div>
+      </div>
+      <!-- Donation Impact -->
+      <div class="col-lg-6">
+        <div style="background:linear-gradient(135deg,#003e3f,#006466);border-radius:16px;padding:2rem;color:white;height:100%;">
+          <h5 style="font-weight:700;margin-bottom:1.5rem;">Funding Impact Analysis</h5>
+          {% if total_donated > 0 %}
+          <div class="d-flex justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.15);">
+            <span style="color:rgba(255,255,255,0.7);">Total CSR Donations Received</span>
+            <strong>₹{{ '{:,.0f}'.format(total_donated) }}</strong>
+          </div>
+          <div class="d-flex justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.15);">
+            <span style="color:rgba(255,255,255,0.7);">Trees Funded (est.)</span>
+            <strong>{{ (total_donated / 10) | int | string }} saplings</strong>
+          </div>
+          <div class="d-flex justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.15);">
+            <span style="color:rgba(255,255,255,0.7);">CO₂ Offset from Donations</span>
+            <strong>{{ (total_donated * 0.0067) | round(1) }} tCO₂e/yr</strong>
+          </div>
+          <div class="d-flex justify-content-between py-2">
+            <span style="color:rgba(255,255,255,0.7);">Area Planted (est.)</span>
+            <strong>{{ (total_donated / 10 / 2500 * 100) | round(2) }} km²</strong>
+          </div>
+          {% else %}
+          <p style="color:rgba(255,255,255,0.7);margin:0;">No donations received yet. Share your Blue.AI profile with potential corporate donors to start funding mangrove restoration.</p>
+          {% endif %}
+          <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:1rem;margin-top:1.5rem;">
+            <p style="color:rgba(255,255,255,0.65);font-size:0.8rem;margin:0;">Carbon estimates assume ₹10/sapling, 2500 trees/ha density, and {{ carbon.seq_rate_tco2_ha_yr }} tCO₂e/ha/yr sequestration rate.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Methodology -->
+    <div class="methodology-card">
+      <h6 style="font-weight:700;color:#003e3f;"><i class="bi bi-journal-text me-2"></i>Methodology &amp; References</h6>
+      <div class="row g-3 mt-1">
+        {% for ref, desc in [
+          ('IPCC Wetlands Supplement 2013', 'Carbon stock values for above-ground biomass (70 tC/ha), below-ground (23 tC/ha), and soil organic carbon (392 tC/ha) based on Southeast Asia mangrove averages.'),
+          ('Donato et al. 2011 (Nature Geoscience)', 'Annual sequestration rate of 6.3 tC/ha/year derived from pan-tropical mangrove study across Indo-Pacific sites.'),
+          ('Blue Carbon Initiative (CI/IOC/IUCN)', 'CO₂ conversion factor of 3.67 tCO₂e per tC applied to convert carbon mass to CO₂ equivalent for reporting.')
+        ] %}
+        <div class="col-md-4">
+          <p style="font-weight:700;color:#003e3f;font-size:0.85rem;margin-bottom:0.25rem;">{{ ref }}</p>
+          <p class="text-muted small mb-0">{{ desc }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% else %}
+    <!-- Placeholder / no area set -->
+    <div class="text-center py-5">
+      <div style="font-size:4rem;margin-bottom:1rem;">&#x1F331;</div>
+      <h4 style="font-weight:700;color:#003e3f;">Configure Your Mangrove Area</h4>
+      <p class="text-muted max-width:500px;">To generate a carbon sequestration report, add your mangrove area (km²) or trees planted count in your profile.</p>
+      <a href="/ngo/profile" class="btn btn-cta px-5">Update Profile</a>
+    </div>
+    {% endif %}
+
+    <div class="tip-card mt-4 no-print">
+      <h6 style="font-weight:700;color:#003e3f;"><i class="bi bi-lightbulb me-2"></i>How to Use This Report</h6>
+      <p class="text-muted small mb-0">Share this carbon data with corporate donors to illustrate the climate impact of their CSR investment. These figures can be cited in grant applications, impact reports, and CSR documentation as <em>indicative estimates based on peer-reviewed methodology</em>. For certified carbon credits, a formal verification process (VCS/Gold Standard) is required.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-counter]').forEach(el => {
+    const target = parseInt(el.dataset.counter);
+    let start = performance.now();
+    function update(now) {
+      const t = Math.min((now - start) / 1800, 1);
+      el.textContent = Math.round(target * (1 - Math.pow(1-t,3))).toLocaleString('en-IN');
+      if (t < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  });
+});
+</script>
+{% endblock %}
